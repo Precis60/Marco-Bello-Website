@@ -12,8 +12,8 @@ export function SiteFooter() {
               Marco Bello
             </div>
             <p className="text-sm text-muted">
-              Luxury rural stays and curated farm sales — livestock, produce, and
-              trees.
+              Bello Marco Farm produces locally made honey, wine, olive oil, vegetables, herbs, fruit, plants, and hay 
+              — fresh, natural, and sustainably grown in Victoria.
             </p>
           </div>
 
@@ -43,7 +43,7 @@ export function SiteFooter() {
                   Enquire
                 </Link>
                 <a className="footerlink" href="mailto:hello@example.com">
-                  enquiries@bellomarco.com.au
+                  admin@bellomarco.com.au
                 </a>
                 <a className="footerlink" href="tel:+61000000000">
                   0413 729 663
@@ -57,7 +57,7 @@ export function SiteFooter() {
               Location
             </div>
             <p className="text-sm text-muted">
-              Replace with your region and pickup / inspection details.
+              275 Founds Road, DRYSDAEL VIC 3222
             </p>
           </div>
         </div>
