@@ -57,7 +57,7 @@ export function SiteFooter() {
               Location
             </div>
             <p className="text-sm text-muted">
-              275 Founds Road, DRYSDAEL VIC 3222
+              275 Founds Road, DRYSDALE VIC 3222
             </p>
           </div>
         </div>

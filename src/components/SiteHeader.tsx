@@ -10,7 +10,7 @@ export function SiteHeader() {
           href="/"
           className="text-sm font-semibold tracking-[0.18em] uppercase text-foreground"
         >
-          Marco Bello
+          Bello Marco Farm
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
