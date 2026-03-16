@@ -42,7 +42,7 @@ export function SiteFooter() {
                 <Link className="footerlink" href="/contact">
                   Enquire
                 </Link>
-                <a className="footerlink" href="mailto:hello@example.com">
+                <a className="footerlink" href="mailto:admin@bellomarco.com.au">
                   admin@bellomarco.com.au
                 </a>
                 <a className="footerlink" href="tel:+61000000000">
@@ -62,16 +62,8 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-2 border-t border-black/10 pt-6 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-10 border-t border-black/10 pt-6 text-xs text-muted">
           <div>© {new Date().getFullYear()} Marco Bello. All rights reserved.</div>
-          <div className="flex items-center gap-4">
-            <a className="footerlink" href="#">
-              Instagram
-            </a>
-            <a className="footerlink" href="#">
-              Facebook
-            </a>
-          </div>
         </div>
       </Container>
     </footer>

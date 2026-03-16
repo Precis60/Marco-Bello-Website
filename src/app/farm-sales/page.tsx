@@ -9,7 +9,7 @@ export default function FarmSalesPage() {
       <Container>
         <div>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Honey, Wine, Oilve Oil, Produce & Plant Sales
+            Honey, Wine, Olive Oil, Produce & Plant Sales
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
             Bello Marco Farm is a family-run farm dedicated to producing high-quality, locally grown products. 

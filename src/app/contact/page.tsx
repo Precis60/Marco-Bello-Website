@@ -1,6 +1,11 @@
 import { Container } from "@/components/Container";
 
 export default function ContactPage() {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    alert('Form submission is not yet implemented. Please contact us directly via email or phone.');
+  };
+
   return (
     <div className="py-16 sm:py-20">
       <Container>
@@ -10,7 +15,7 @@ export default function ContactPage() {
               Enquire
             </h1>
             <p className="mt-4 text-base leading-7 text-muted">
-              Send a short note and I’ll reply with availability, pricing, and
+              Send a short note and I'll reply with availability, pricing, and
               next steps.
             </p>
 
@@ -30,25 +35,25 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <form className="rounded-2xl border border-black/10 bg-surface p-6">
+          <form onSubmit={handleSubmit} className="rounded-2xl border border-black/10 bg-surface p-6">
             <div className="grid gap-4">
               <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
+                <label htmlFor="name" className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   Name
                 </label>
-                <input className="input" name="name" />
+                <input id="name" className="input" name="name" required />
               </div>
               <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
+                <label htmlFor="email" className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   Email
                 </label>
-                <input className="input" name="email" type="email" />
+                <input id="email" className="input" name="email" type="email" required />
               </div>
               <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
+                <label htmlFor="topic" className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   What are you enquiring about?
                 </label>
-                <select className="input" name="topic" defaultValue="rentals">
+                <select id="topic" className="input" name="topic" defaultValue="rentals" required>
                   <option value="rentals">Luxury rentals</option>
                   <option value="livestock">Livestock sales</option>
                   <option value="produce">Produce sales</option>
@@ -56,13 +61,13 @@ export default function ContactPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
+                <label htmlFor="message" className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   Message
                 </label>
-                <textarea className="input min-h-32" name="message" />
+                <textarea id="message" className="input min-h-32" name="message" required />
               </div>
 
-              <button type="button" className="btn btn-primary">
+              <button type="submit" className="btn btn-primary">
                 Send enquiry
               </button>
               <p className="text-xs text-muted">
