@@ -24,10 +24,10 @@ export function SiteFooter() {
               </div>
               <div className="flex flex-col gap-2">
                 <Link className="footerlink" href="/rentals">
-                  Luxury Rentals
+                  Rental Availability
                 </Link>
                 <Link className="footerlink" href="/farm-sales">
-                  Farm Sales
+                  Honey and Wine, Olive Oil and small plants
                 </Link>
                 <Link className="footerlink" href="/about">
                   About

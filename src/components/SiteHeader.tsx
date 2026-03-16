@@ -15,10 +15,10 @@ export function SiteHeader() {
 
         <nav className="hidden items-center gap-8 md:flex">
           <Link href="/rentals" className="navlink">
-            Luxury Rentals
+            Rental Availability
           </Link>
           <Link href="/farm-sales" className="navlink">
-            Farm Sales
+            Honey and Wine, Olive Oil and small plants
           </Link>
           <Link href="/about" className="navlink">
             About
