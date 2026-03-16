@@ -18,7 +18,7 @@ export function SiteHeader() {
             Rental Availability
           </Link>
           <Link href="/farm-sales" className="navlink">
-            Honey and Wine, Olive Oil and small plants
+            Honey, Wine, Olive Oil and Small Plants
           </Link>
           <Link href="/about" className="navlink">
             About
