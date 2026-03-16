@@ -43,10 +43,10 @@ export function SiteFooter() {
                   Enquire
                 </Link>
                 <a className="footerlink" href="mailto:hello@example.com">
-                  hello@example.com
+                  enquiries@bellomarco.com.au
                 </a>
                 <a className="footerlink" href="tel:+61000000000">
-                  +61 000 000 000
+                  0413 729 663
                 </a>
               </div>
             </div>
