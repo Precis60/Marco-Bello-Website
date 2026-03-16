@@ -19,15 +19,15 @@ export default function RentalsPage() {
         <div className="mt-12 grid gap-6 md:grid-cols-3">
           {[
             {
-              name: "The Homestead",
+              name: "The Main House",
               blurb: "A considered, high-comfort stay with sweeping views.",
             },
             {
-              name: "The Cottage",
+              name: "Vineyard - Tiny Home",
               blurb: "Quiet, warm interiors with an orchard outlook.",
             },
             {
-              name: "The Loft",
+              name: "Hobby Farm - Tiny Home",
               blurb: "Minimal luxury — perfect for weekends and events.",
             },
           ].map((item) => (
