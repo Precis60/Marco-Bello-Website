@@ -19,13 +19,13 @@ export default function ContactPage() {
                 <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   Email
                 </div>
-                <div className="mt-1">hello@example.com</div>
+                <div className="mt-1">enquiries@bellomarco.com.au</div>
               </div>
               <div>
                 <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   Phone
                 </div>
-                <div className="mt-1">+61 000 000 000</div>
+                <div className="mt-1">0413 729 663</div>
               </div>
             </div>
           </div>
