@@ -19,7 +19,7 @@ export default function ContactPage() {
                 <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
                   Email
                 </div>
-                <div className="mt-1">enquiries@bellomarco.com.au</div>
+                <div className="mt-1">admin@bellomarco.com.au</div>
               </div>
               <div>
                 <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
