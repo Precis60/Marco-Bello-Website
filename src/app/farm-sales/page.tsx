@@ -12,7 +12,7 @@ export default function FarmSalesPage() {
             Honey, Wine, Oilve Oil, Produce & Plant Sales
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
-            ello Marco Farm is a family-run farm dedicated to producing 
+            Bello Marco Farm is a family-run farm dedicated to producing 
             high-quality, locally grown products. Surrounded by natural countryside, 
             the farm offers a variety of fresh and handcrafted goods including pure local honey, small-batch wine, and premium olive oil. Our fields and gardens produce seasonal vegetables, fragrant herbs, and fresh fruit, while our nursery provides a range of healthy plants for home gardens. We also harvest quality hay to support local farming needs. At Bello Marco Farm, we focus on sustainable practices and authentic farm-to-table produce, bringing the best of the land directly to our community.
           </p>
