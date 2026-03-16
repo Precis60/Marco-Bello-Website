@@ -14,14 +14,6 @@ export default function RentalsPage() {
             Showcase your luxury stays here. Add availability, inclusions, and a
             short story for each property.
           </p>
-          <div className="mt-8 flex gap-3">
-            <Link className="btn btn-primary" href="/contact">
-              Enquire about dates
-            </Link>
-            <Link className="btn btn-secondary" href="/">
-              Back to home
-            </Link>
-          </div>
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
