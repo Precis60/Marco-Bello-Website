@@ -7,7 +7,7 @@ export default function FarmSalesPage() {
   return (
     <div className="py-16 sm:py-20">
       <Container>
-        <div className="max-w-2xl">
+        <div>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             Honey, Wine, Oilve Oil, Produce & Plant Sales
           </h1>
