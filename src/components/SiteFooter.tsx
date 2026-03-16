@@ -27,7 +27,7 @@ export function SiteFooter() {
                   Rental Availability
                 </Link>
                 <Link className="footerlink" href="/farm-sales">
-                  Honey and Wine, Olive Oil and small plants
+                  Honey, Wine, Olive Oil and small plants
                 </Link>
                 <Link className="footerlink" href="/about">
                   About
