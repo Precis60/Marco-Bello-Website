@@ -6,7 +6,7 @@ export default function RentalsPage() {
   return (
     <div className="py-16 sm:py-20">
       <Container>
-        <div className="max-w-2xl">
+        <div>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             Peaceful Holiday Retreats
           </h1>
