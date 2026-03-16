@@ -8,7 +8,7 @@ export default function RentalsPage() {
       <Container>
         <div className="max-w-2xl">
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Luxury Rentals
+            Peaceful Holiday Retreats
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
             Nestled in the scenic countryside of Drysdale, Bello Marco Farm offers two unique stays surrounded by 
