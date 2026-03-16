@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Container } from "@/components/Container";
+import { farmSalesData } from "@/data/listings";
 
 export default function FarmSalesPage() {
   return (
@@ -25,27 +26,36 @@ export default function FarmSalesPage() {
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {["Honey, Wine & Olive Oil", "Produce", "Trees"].map((title) => (
+          {farmSalesData.map((category) => (
             <section
-              key={title}
+              key={category.title}
               className="rounded-2xl border border-black/10 bg-surface p-6"
             >
               <h2 className="text-sm font-semibold tracking-[0.12em] uppercase">
-                {title}
+                {category.title}
               </h2>
               <p className="mt-3 text-sm leading-6 text-muted">
-                Add your current offerings, pricing guidance, and seasonal
-                availability.
+                {category.description}
               </p>
               <div className="mt-6 grid gap-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="rounded-xl bg-black/5 p-4">
+                {category.listings.map((listing) => (
+                  <div key={listing.id} className="rounded-xl bg-black/5 p-4">
                     <div className="text-sm font-medium text-foreground">
-                      Listing {i}
+                      {listing.name}
                     </div>
                     <div className="mt-1 text-xs text-muted">
-                      Details, pricing, and contact info
+                      {listing.description}
                     </div>
+                    {listing.price && (
+                      <div className="mt-2 text-xs font-medium text-foreground">
+                        {listing.price}
+                      </div>
+                    )}
+                    {listing.availability && (
+                      <div className="mt-1 text-xs text-muted">
+                        {listing.availability}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
