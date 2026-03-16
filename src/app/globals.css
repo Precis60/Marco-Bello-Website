@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fbfaf7;
+  --foreground: #161616;
+  --surface: #ffffff;
+  --muted: rgba(22, 22, 22, 0.68);
+  --muted-2: rgba(22, 22, 22, 0.52);
+  --brand: #1f3a2e;
+  --brand-2: #b08d57;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-muted-2: var(--muted-2);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --surface: #111111;
+    --muted: rgba(237, 237, 237, 0.68);
+    --muted-2: rgba(237, 237, 237, 0.52);
+    --brand: #2b5a46;
+    --brand-2: #c9a46a;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 20%, transparent);
+  }
+}
+
+@layer components {
+  .navlink {
+    @apply text-xs font-semibold tracking-[0.18em] uppercase text-muted transition-colors hover:text-foreground;
+  }
+
+  .footerlink {
+    @apply text-muted transition-colors hover:text-foreground;
+  }
+
+  .btn {
+    @apply inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-semibold tracking-wide transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-brand text-white hover:bg-brand/90;
+  }
+
+  .btn-secondary {
+    @apply border border-black/15 bg-transparent text-foreground hover:bg-black/5;
+  }
+
+  .input {
+    @apply mt-2 w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-sm text-foreground outline-none ring-0 transition focus:border-black/30;
+  }
+}
