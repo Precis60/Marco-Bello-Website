@@ -25,7 +25,7 @@ export default function FarmSalesPage() {
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {["Livestock", "Produce", "Trees"].map((title) => (
+          {["Honey, Wine & Olive Oil", "Produce", "Trees"].map((title) => (
             <section
               key={title}
               className="rounded-2xl border border-black/10 bg-surface p-6"
