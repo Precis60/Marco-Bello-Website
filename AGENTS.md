@@ -71,6 +71,9 @@ local development, copy it to `.env.local` and fill in the values.
 5. Visit `https://<your-domain>/admin/blocks` to mark date ranges as
    unavailable for either property. Blocked dates are treated as booked and
    cannot be selected by guests.
+6. Visit `https://<your-domain>/admin/bookings` to view all bookings in a
+   calendar, including date range, client name, daily rate, total price, and
+   special requests.
 
 ### How booking availability works
 

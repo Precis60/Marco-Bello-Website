@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     endDate?: string;
     guestName?: string;
     guestEmail?: string;
+    specialRequests?: string;
   };
   try {
     body = await request.json();
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const { propertyId, startDate, endDate, guestName, guestEmail } = body;
+  const { propertyId, startDate, endDate, guestName, guestEmail, specialRequests } = body;
   const property = propertyId ? getProperty(propertyId) : undefined;
 
   if (!property || !startDate || !endDate || !guestName || !guestEmail) {
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       endDate,
       guestName,
       guestEmail,
+      specialRequests,
     });
 
     const stripe = new Stripe(stripeSecretKey);

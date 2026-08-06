@@ -33,10 +33,13 @@ async function ensureSchema() {
         end_date DATE NOT NULL,
         guest_name TEXT NOT NULL,
         guest_email TEXT NOT NULL,
+        special_requests TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
         stripe_session_id TEXT UNIQUE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       );
+
+      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS special_requests TEXT;
 
       CREATE TABLE IF NOT EXISTS daily_prices (
         id SERIAL PRIMARY KEY,
@@ -118,12 +121,13 @@ export async function createPendingBooking(params: {
   endDate: string;
   guestName: string;
   guestEmail: string;
+  specialRequests?: string;
 }): Promise<number> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO bookings (property_id, start_date, end_date, guest_name, guest_email, status)
-    VALUES (${params.propertyId}, ${params.startDate}, ${params.endDate}, ${params.guestName}, ${params.guestEmail}, 'pending')
+    INSERT INTO bookings (property_id, start_date, end_date, guest_name, guest_email, special_requests, status)
+    VALUES (${params.propertyId}, ${params.startDate}, ${params.endDate}, ${params.guestName}, ${params.guestEmail}, ${params.specialRequests ?? null}, 'pending')
     RETURNING id
   `;
   return (rows[0] as { id: number }).id;
@@ -276,4 +280,27 @@ export async function deleteBlockedRange(id: number): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`DELETE FROM unavailable WHERE id = ${id}`;
+}
+
+export interface BookingRow {
+  id: number;
+  property_id: string;
+  start_date: string;
+  end_date: string;
+  guest_name: string;
+  guest_email: string;
+  special_requests: string | null;
+  status: string;
+  created_at: string;
+}
+
+export async function getAllBookings(): Promise<BookingRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, property_id, start_date, end_date, guest_name, guest_email, special_requests, status, created_at
+    FROM bookings
+    ORDER BY start_date DESC
+  `;
+  return rows as unknown as BookingRow[];
 }

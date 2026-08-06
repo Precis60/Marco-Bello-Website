@@ -28,6 +28,7 @@ export function BookingCalendar({
   const [range, setRange] = useState<DateRange | undefined>();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [specialRequests, setSpecialRequests] = useState("");
   const [dailyPrices, setDailyPrices] = useState<Record<string, number>>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -143,6 +144,7 @@ export function BookingCalendar({
           endDate: format(range.to, "yyyy-MM-dd"),
           guestName: name,
           guestEmail: email,
+          specialRequests,
         }),
       });
       const data = await res.json();
@@ -235,6 +237,22 @@ export function BookingCalendar({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${propertyId}-requests`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Special requests
+          </label>
+          <textarea
+            id={`${propertyId}-requests`}
+            className="input"
+            rows={3}
+            value={specialRequests}
+            onChange={(e) => setSpecialRequests(e.target.value)}
+            placeholder="Dietary requirements, accessibility needs, late check-in, etc."
           />
         </div>
 

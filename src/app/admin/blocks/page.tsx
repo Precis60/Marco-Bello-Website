@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { AdminTabs } from "@/components/AdminTabs";
 import { properties } from "@/lib/properties";
 
 interface BlockedRange {
@@ -120,6 +121,7 @@ export default function AdminBlocksPage() {
   return (
     <div className="py-16 sm:py-20">
       <div className="mx-auto max-w-2xl space-y-6">
+        <AdminTabs />
         <div className="rounded-2xl border border-black/10 bg-surface p-6">
           <h1 className="text-2xl font-semibold tracking-tight">Block unavailable dates</h1>
           <p className="mt-2 text-sm text-foreground">
