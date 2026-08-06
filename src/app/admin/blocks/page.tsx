@@ -44,7 +44,9 @@ export default function AdminBlocksPage() {
 
   useEffect(() => {
     if (!authenticated) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadBlocks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated, propertyId]);
 
   const addBlock = async (e: React.FormEvent) => {

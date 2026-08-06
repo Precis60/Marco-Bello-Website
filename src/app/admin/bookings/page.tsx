@@ -43,6 +43,8 @@ const MONTH_NAMES = [
   "December",
 ];
 
+const STATUSES = ["pending", "confirmed", "cancelled"];
+
 function startOfMonth(date: Date) {
   const d = new Date(date);
   d.setDate(1);
@@ -73,6 +75,8 @@ export default function AdminBookingsPage() {
   const [month, setMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<BookingWithPrice | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
@@ -103,7 +107,9 @@ export default function AdminBookingsPage() {
 
   useEffect(() => {
     if (!authenticated) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadBookings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
 
   const filteredBookings = useMemo(() => {
@@ -141,6 +147,65 @@ export default function AdminBookingsPage() {
     const d = new Date(month);
     d.setMonth(d.getMonth() + 1);
     setMonth(d);
+  };
+
+  const updateField = <K extends keyof BookingWithPrice>(key: K, value: BookingWithPrice[K]) => {
+    if (!editing) return;
+    setEditing({ ...editing, [key]: value });
+  };
+
+  const saveBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing) return;
+    setSaving(true);
+    setError(null);
+
+    const res = await fetch("/api/bookings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        id: editing.id,
+        startDate: editing.startDate,
+        endDate: editing.endDate,
+        firstName: editing.firstName,
+        lastName: editing.lastName,
+        email: editing.email,
+        phone: editing.phone,
+        totalGuests: editing.totalGuests,
+        childrenAges: editing.childrenAges,
+        checkInTime: editing.checkInTime,
+        checkOutTime: editing.checkOutTime,
+        specialRequests: editing.specialRequests,
+        status: editing.status,
+      }),
+    });
+
+    if (res.ok) {
+      setEditing(null);
+      await loadBookings();
+    } else {
+      const data = await res.json();
+      setError(data.error ?? "Couldn’t save booking.");
+    }
+    setSaving(false);
+  };
+
+  const removeBooking = async (id: number) => {
+    if (!window.confirm("Delete this booking?")) return;
+    setError(null);
+    const res = await fetch("/api/bookings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, id }),
+    });
+
+    if (res.ok) {
+      await loadBookings();
+    } else {
+      const data = await res.json();
+      setError(data.error ?? "Couldn’t delete booking.");
+    }
   };
 
   if (!authenticated) {
@@ -272,7 +337,8 @@ export default function AdminBookingsPage() {
                         <th className="p-3">Client</th>
                         <th className="p-3">Guests</th>
                         <th className="p-3">Total</th>
-                        <th className="p-3">Check in/out</th>
+                        <th className="p-3">Status</th>
+                        <th className="p-3"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -297,8 +363,33 @@ export default function AdminBookingsPage() {
                           </td>
                           <td className="p-3 font-semibold">${b.total}</td>
                           <td className="p-3">
-                            <div className="text-xs">In: {b.checkInTime ?? "—"}</div>
-                            <div className="text-xs">Out: {b.checkOutTime ?? "—"}</div>
+                            <span
+                              className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                                b.status === "confirmed"
+                                  ? "bg-green-100 text-green-800"
+                                  : b.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {b.status}
+                            </span>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setEditing(b)}
+                                className="text-xs font-semibold text-foreground hover:underline"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => removeBooking(b.id)}
+                                className="text-xs font-semibold text-red-600 hover:underline"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -328,6 +419,180 @@ export default function AdminBookingsPage() {
             </div>
           )}
         </div>
+
+        {editing && (
+          <div className="rounded-2xl border border-black/10 bg-surface p-6">
+            <h2 className="text-xl font-semibold tracking-tight">Edit booking</h2>
+            <form onSubmit={saveBooking} className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Property
+                </label>
+                <input className="input" value={editing.propertyName} disabled />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Status
+                </label>
+                <select
+                  className="input"
+                  value={editing.status}
+                  onChange={(e) => updateField("status", e.target.value)}
+                >
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Start date
+                </label>
+                <input
+                  type="date"
+                  className="input"
+                  value={editing.startDate}
+                  onChange={(e) => updateField("startDate", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  End date
+                </label>
+                <input
+                  type="date"
+                  className="input"
+                  value={editing.endDate}
+                  onChange={(e) => updateField("endDate", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  First name
+                </label>
+                <input
+                  className="input"
+                  value={editing.firstName ?? ""}
+                  onChange={(e) => updateField("firstName", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Last name
+                </label>
+                <input
+                  className="input"
+                  value={editing.lastName ?? ""}
+                  onChange={(e) => updateField("lastName", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  className="input"
+                  value={editing.email ?? ""}
+                  onChange={(e) => updateField("email", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  className="input"
+                  value={editing.phone ?? ""}
+                  onChange={(e) => updateField("phone", e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Total guests
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  className="input"
+                  value={editing.totalGuests ?? 1}
+                  onChange={(e) => {
+                    const n = e.target.value === "" ? null : Number(e.target.value);
+                    updateField("totalGuests", n !== null && !Number.isNaN(n) ? n : null);
+                  }}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Children&apos;s ages
+                </label>
+                <input
+                  className="input"
+                  value={editing.childrenAges ?? ""}
+                  onChange={(e) => updateField("childrenAges", e.target.value)}
+                  placeholder="e.g. 4, 7"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Check-in time
+                </label>
+                <input
+                  type="time"
+                  className="input"
+                  value={editing.checkInTime ?? ""}
+                  onChange={(e) => updateField("checkInTime", e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Check-out time
+                </label>
+                <input
+                  type="time"
+                  className="input"
+                  value={editing.checkOutTime ?? ""}
+                  onChange={(e) => updateField("checkOutTime", e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                  Special requests
+                </label>
+                <textarea
+                  className="input"
+                  rows={3}
+                  value={editing.specialRequests ?? ""}
+                  onChange={(e) => updateField("specialRequests", e.target.value)}
+                />
+              </div>
+
+              <div className="sm:col-span-2 flex gap-3">
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? "Saving…" : "Save changes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditing(null)}
+                  className="btn btn-secondary"
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

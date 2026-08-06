@@ -116,21 +116,31 @@ export async function getBookedRanges(propertyId: string): Promise<BookedRange[]
   );
 }
 
-export async function hasOverlap(
+async function hasOverlapQuery(
+  sql: ReturnType<typeof getSql>,
   propertyId: string,
   startDate: string,
   endDate: string,
-): Promise<boolean> {
-  await ensureSchema();
-  const sql = getSql();
-  const bookingRows = await sql`
-    SELECT id FROM bookings
-    WHERE property_id = ${propertyId}
-      AND (status = 'confirmed' OR (status = 'pending' AND created_at > now() - interval '30 minutes'))
-      AND start_date < ${endDate}
-      AND end_date > ${startDate}
-    LIMIT 1
-  `;
+  excludeBookingId?: number,
+) {
+  const bookingRows = excludeBookingId
+    ? await sql`
+        SELECT id FROM bookings
+        WHERE property_id = ${propertyId}
+          AND id != ${excludeBookingId}
+          AND (status = 'confirmed' OR (status = 'pending' AND created_at > now() - interval '30 minutes'))
+          AND start_date < ${endDate}
+          AND end_date > ${startDate}
+        LIMIT 1
+      `
+    : await sql`
+        SELECT id FROM bookings
+        WHERE property_id = ${propertyId}
+          AND (status = 'confirmed' OR (status = 'pending' AND created_at > now() - interval '30 minutes'))
+          AND start_date < ${endDate}
+          AND end_date > ${startDate}
+        LIMIT 1
+      `;
   if (bookingRows.length > 0) return true;
   const unavailableRows = await sql`
     SELECT id FROM unavailable
@@ -140,6 +150,27 @@ export async function hasOverlap(
     LIMIT 1
   `;
   return unavailableRows.length > 0;
+}
+
+export async function hasOverlap(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+): Promise<boolean> {
+  await ensureSchema();
+  const sql = getSql();
+  return hasOverlapQuery(sql, propertyId, startDate, endDate);
+}
+
+export async function hasOverlapExcluding(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+  excludeBookingId: number,
+): Promise<boolean> {
+  await ensureSchema();
+  const sql = getSql();
+  return hasOverlapQuery(sql, propertyId, startDate, endDate, excludeBookingId);
 }
 
 export async function createPendingBooking(params: {
@@ -385,4 +416,64 @@ export async function getAllBookings(): Promise<BookingRow[]> {
     ORDER BY start_date DESC
   `;
   return rows as unknown as BookingRow[];
+}
+
+export async function updateBooking(
+  id: number,
+  fields: Partial<BookingRow>,
+): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`SELECT id, property_id FROM bookings WHERE id = ${id}`;
+  if (rows.length === 0) {
+    throw new Error("Booking not found.");
+  }
+
+  const existing = rows[0] as { id: number; property_id: string };
+  const propertyId = fields.property_id ?? existing.property_id;
+  const startDate = fields.start_date ?? null;
+  const endDate = fields.end_date ?? null;
+  const firstName = fields.first_name ?? null;
+  const lastName = fields.last_name ?? null;
+  const email = fields.email ?? null;
+  const phone = fields.phone ?? null;
+  const totalGuests = fields.total_guests ?? null;
+  const childrenAges = fields.children_ages ?? null;
+  const checkInTime = fields.check_in_time ?? null;
+  const checkOutTime = fields.check_out_time ?? null;
+  const specialRequests = fields.special_requests ?? null;
+  const status = fields.status ?? null;
+
+  if (startDate && endDate) {
+    if (new Date(startDate) >= new Date(endDate)) {
+      throw new Error("Check-out must be after check-in.");
+    }
+    if (await hasOverlapExcluding(propertyId, startDate, endDate, id)) {
+      throw new Error("Those dates overlap with another booking or blocked range.");
+    }
+  }
+
+  await sql`
+    UPDATE bookings
+    SET
+      start_date = COALESCE(${startDate}, start_date),
+      end_date = COALESCE(${endDate}, end_date),
+      first_name = COALESCE(${firstName}, first_name),
+      last_name = COALESCE(${lastName}, last_name),
+      email = COALESCE(${email}, email),
+      phone = COALESCE(${phone}, phone),
+      total_guests = COALESCE(${totalGuests}, total_guests),
+      children_ages = COALESCE(${childrenAges}, children_ages),
+      check_in_time = COALESCE(${checkInTime}, check_in_time),
+      check_out_time = COALESCE(${checkOutTime}, check_out_time),
+      special_requests = COALESCE(${specialRequests}, special_requests),
+      status = COALESCE(${status}, status)
+    WHERE id = ${id}
+  `;
+}
+
+export async function deleteBooking(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM bookings WHERE id = ${id}`;
 }
