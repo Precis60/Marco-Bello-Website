@@ -36,6 +36,16 @@ async function ensureSchema() {
         status TEXT NOT NULL DEFAULT 'pending',
         stripe_session_id TEXT UNIQUE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE TABLE IF NOT EXISTS daily_prices (
+        id SERIAL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        date DATE NOT NULL,
+        price INTEGER NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE (property_id, date)
       )
     `.then(() => undefined);
   }
@@ -111,5 +121,98 @@ export async function confirmBookingBySessionId(stripeSessionId: string) {
   const sql = getSql();
   await sql`
     UPDATE bookings SET status = 'confirmed' WHERE stripe_session_id = ${stripeSessionId}
+  `;
+}
+
+export interface DailyPrice {
+  date: string;
+  price: number;
+}
+
+export async function getPricesForRange(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+): Promise<DailyPrice[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT date, price FROM daily_prices
+    WHERE property_id = ${propertyId}
+      AND date >= ${startDate}
+      AND date < ${endDate}
+    ORDER BY date ASC
+  `;
+  return rows as unknown as DailyPrice[];
+}
+
+export async function calculateTotal(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+  defaultPrice: number,
+): Promise<{ total: number; breakdown: { date: string; price: number }[] }> {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const nights = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+  const prices = await getPricesForRange(propertyId, startDate, endDate);
+  const priceMap = new Map(prices.map((p) => [p.date, p.price]));
+
+  const breakdown: { date: string; price: number }[] = [];
+  let total = 0;
+
+  const cursor = new Date(start);
+  for (let i = 0; i < nights; i++) {
+    const date = cursor.toISOString().split("T")[0];
+    const price = priceMap.get(date) ?? defaultPrice;
+    breakdown.push({ date, price });
+    total += price;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return { total, breakdown };
+}
+
+export async function setPricesForRange(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+  price: number,
+): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const nights = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+  const dates: string[] = [];
+  const cursor = new Date(start);
+  for (let i = 0; i < nights; i++) {
+    dates.push(cursor.toISOString().split("T")[0]);
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  for (const date of dates) {
+    await sql`
+      INSERT INTO daily_prices (property_id, date, price)
+      VALUES (${propertyId}, ${date}, ${price})
+      ON CONFLICT (property_id, date) DO UPDATE SET price = ${price}, updated_at = now()
+    `;
+  }
+}
+
+export async function deletePricesForRange(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    DELETE FROM daily_prices
+    WHERE property_id = ${propertyId}
+      AND date >= ${startDate}
+      AND date < ${endDate}
   `;
 }

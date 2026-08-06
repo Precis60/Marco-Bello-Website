@@ -60,6 +60,15 @@ table is created automatically the first time the app queries it.
 See `.env.example` for the full list of required environment variables. For
 local development, copy it to `.env.local` and fill in the values.
 
+### 3. Admin pricing token (for /admin/prices)
+
+1. Generate a long random string (e.g. `openssl rand -hex 32` or any secure
+   generator).
+2. Add it as `ADMIN_TOKEN` in Vercel's environment variables.
+3. Redeploy.
+4. Visit `https://<your-domain>/admin/prices`, enter the token, and use the
+   form to set custom nightly rates for any date range.
+
 ### How booking availability works
 
 - Each property (`main-house`, `vineyard-tiny-home`) is configured in

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { attachStripeSession, createPendingBooking, hasOverlap } from "@/lib/db";
+import { attachStripeSession, calculateTotal, createPendingBooking, hasOverlap } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
 
 function nightsBetween(startDate: string, endDate: string) {
@@ -54,6 +54,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { total } = await calculateTotal(property.id, startDate, endDate, property.nightlyPrice);
+
     const bookingId = await createPendingBooking({
       propertyId: property.id,
       startDate,
@@ -64,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     const stripe = new Stripe(stripeSecretKey);
     const origin = request.nextUrl.origin;
-    const amountInCents = nights * property.nightlyPrice * 100;
+    const amountInCents = total * 100;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
             unit_amount: amountInCents,
             product_data: {
               name: `${property.name} — ${nights} night${nights > 1 ? "s" : ""}`,
-              description: `${startDate} to ${endDate}`,
+              description: `${startDate} to ${endDate} — $${total} total`,
             },
           },
           quantity: 1,

@@ -28,6 +28,8 @@ export function BookingCalendar({
   const [range, setRange] = useState<DateRange | undefined>();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [dailyPrices, setDailyPrices] = useState<Record<string, number>>({});
+  const [loadingPrices, setLoadingPrices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,8 +67,56 @@ export function BookingCalendar({
     ];
   }, [bookedRanges]);
 
+  useEffect(() => {
+    if (!range?.from || !range?.to) {
+      setDailyPrices({});
+      return;
+    }
+
+    let cancelled = false;
+    setLoadingPrices(true);
+    const start = format(range.from, "yyyy-MM-dd");
+    const end = format(range.to, "yyyy-MM-dd");
+
+    fetch(`/api/prices?propertyId=${propertyId}&start=${start}&end=${end}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) {
+          const map: Record<string, number> = {};
+          for (const item of data.prices ?? []) {
+            map[item.date] = item.price;
+          }
+          setDailyPrices(map);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setError("Couldn’t load prices for the selected dates.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingPrices(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [propertyId, range]);
+
   const nights = range?.from && range?.to ? differenceInCalendarDays(range.to, range.from) : 0;
-  const total = nights * nightlyPrice;
+  const priceBreakdown = useMemo(() => {
+    if (!range?.from || !range?.to) return [];
+    const result: { date: string; price: number }[] = [];
+    const cursor = new Date(range.from);
+    for (let i = 0; i < nights; i++) {
+      const date = format(cursor, "yyyy-MM-dd");
+      result.push({ date, price: dailyPrices[date] ?? nightlyPrice });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return result;
+  }, [range, nightlyPrice, nights, dailyPrices]);
+  const total = useMemo(
+    () => priceBreakdown.reduce((sum, day) => sum + day.price, 0),
+    [priceBreakdown],
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -142,6 +192,11 @@ export function BookingCalendar({
           <div className="mt-1 font-medium text-foreground">
             {nights} night{nights > 1 ? "s" : ""} · ${total} total
           </div>
+          {priceBreakdown.some((day) => day.price !== nightlyPrice) && (
+            <p className="mt-1 text-xs text-muted">
+              Based on custom nightly rates for these dates.
+            </p>
+          )}
         </div>
       )}
 
@@ -180,8 +235,8 @@ export function BookingCalendar({
 
         {error && <p className="text-xs text-red-600">{error}</p>}
 
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? "Redirecting to payment…" : "Book & pay"}
+        <button type="submit" className="btn btn-primary" disabled={submitting || loadingPrices}>
+          {submitting ? "Redirecting to payment…" : loadingPrices ? "Loading rates…" : "Book & pay"}
         </button>
         <p className="text-xs text-muted">
           You&apos;ll be redirected to Stripe to securely complete payment.
