@@ -11,14 +11,14 @@ export const properties: Record<string, Property> = {
     id: "main-house",
     name: "The Main House",
     blurb: "A considered, high-comfort stay with sweeping views.",
-    nightlyPrice: 250,
+    nightlyPrice: 2250,
     minNights: 2,
   },
   "vineyard-tiny-home": {
     id: "vineyard-tiny-home",
     name: "Vineyard - Tiny Home",
     blurb: "Quiet, warm interiors with an orchard outlook.",
-    nightlyPrice: 150,
+    nightlyPrice: 375,
     minNights: 2,
   },
 };
