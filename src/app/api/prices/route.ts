@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { propertyId, startDate, endDate, price } = body;
-  if (!getProperty(propertyId) || !startDate || !endDate || typeof price !== "number" || price < 0) {
+  if (!propertyId || !getProperty(propertyId) || !startDate || !endDate || typeof price !== "number" || price < 0) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
@@ -100,7 +100,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   const { propertyId, startDate, endDate } = body;
-  if (!getProperty(propertyId) || !startDate || !endDate) {
+  if (!propertyId || !getProperty(propertyId) || !startDate || !endDate) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 

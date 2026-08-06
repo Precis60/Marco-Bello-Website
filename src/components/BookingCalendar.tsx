@@ -68,13 +68,9 @@ export function BookingCalendar({
   }, [bookedRanges]);
 
   useEffect(() => {
-    if (!range?.from || !range?.to) {
-      setDailyPrices({});
-      return;
-    }
+    if (!range?.from || !range?.to) return;
 
     let cancelled = false;
-    setLoadingPrices(true);
     const start = format(range.from, "yyyy-MM-dd");
     const end = format(range.to, "yyyy-MM-dd");
 
@@ -87,13 +83,14 @@ export function BookingCalendar({
             map[item.date] = item.price;
           }
           setDailyPrices(map);
+          setLoadingPrices(false);
         }
       })
       .catch(() => {
-        if (!cancelled) setError("Couldn’t load prices for the selected dates.");
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingPrices(false);
+        if (!cancelled) {
+          setError("Couldn’t load prices for the selected dates.");
+          setLoadingPrices(false);
+        }
       });
 
     return () => {
@@ -177,7 +174,15 @@ export function BookingCalendar({
           <DayPicker
             mode="range"
             selected={range}
-            onSelect={setRange}
+            onSelect={(selected) => {
+              setRange(selected);
+              if (selected?.from && selected?.to) {
+                setLoadingPrices(true);
+              } else {
+                setDailyPrices({});
+                setLoadingPrices(false);
+              }
+            }}
             disabled={disabledDays}
             numberOfMonths={1}
           />
