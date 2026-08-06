@@ -70,7 +70,7 @@ export default function AdminPricesPage() {
       <div className="py-16 sm:py-20">
         <div className="mx-auto max-w-md rounded-2xl border border-black/10 bg-surface p-6">
           <h1 className="text-2xl font-semibold tracking-tight">Admin login</h1>
-          <p className="mt-2 text-sm text-muted">Enter the admin token to manage daily prices.</p>
+          <p className="mt-2 text-sm text-foreground">Enter the admin token to manage daily prices.</p>
           <form onSubmit={login} className="mt-6 grid gap-4">
             <input
               type="password"
@@ -95,14 +95,14 @@ export default function AdminPricesPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         <div className="rounded-2xl border border-black/10 bg-surface p-6">
           <h1 className="text-2xl font-semibold tracking-tight">Set daily prices</h1>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-sm text-foreground">
             Choose a property and a date range, then set the nightly price for each night in that range.
             Dates outside any set range fall back to the default price shown below.
           </p>
 
           <form onSubmit={setPrices} className="mt-6 grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Property</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Property</label>
               <select
                 className="input"
                 value={propertyId}
@@ -116,7 +116,7 @@ export default function AdminPricesPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Nightly price ($)</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Nightly price ($)</label>
               <input
                 type="number"
                 min={0}
@@ -127,7 +127,7 @@ export default function AdminPricesPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Start date</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Start date</label>
               <input
                 type="date"
                 className="input"
@@ -137,7 +137,7 @@ export default function AdminPricesPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">End date</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">End date</label>
               <input
                 type="date"
                 className="input"
@@ -162,7 +162,7 @@ export default function AdminPricesPage() {
           <h2 className="text-xl font-semibold tracking-tight">View existing prices</h2>
           <form onSubmit={viewExisting} className="mt-4 grid gap-4 sm:grid-cols-3">
             <div className="sm:col-span-3">
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Property</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Property</label>
               <select
                 className="input"
                 value={propertyId}
@@ -176,7 +176,7 @@ export default function AdminPricesPage() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">From</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">From</label>
               <input
                 type="date"
                 className="input"
@@ -186,7 +186,7 @@ export default function AdminPricesPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">To</label>
+              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">To</label>
               <input
                 type="date"
                 className="input"
@@ -205,7 +205,7 @@ export default function AdminPricesPage() {
           {viewPrices && (
             <div className="mt-6 max-h-80 overflow-auto rounded-xl border border-black/10">
               <table className="w-full text-sm">
-                <thead className="bg-black/5 text-left text-xs uppercase text-muted">
+                <thead className="bg-black/5 text-left text-xs uppercase text-foreground">
                   <tr>
                     <th className="p-3">Date</th>
                     <th className="p-3">Price</th>
@@ -214,7 +214,7 @@ export default function AdminPricesPage() {
                 <tbody>
                   {viewPrices.length === 0 ? (
                     <tr>
-                      <td className="p-3 text-muted" colSpan={2}>
+                      <td className="p-3 text-foreground" colSpan={2}>
                         No custom prices in this range. Default rates will apply.
                       </td>
                     </tr>
