@@ -68,6 +68,9 @@ local development, copy it to `.env.local` and fill in the values.
 3. Redeploy.
 4. Visit `https://<your-domain>/admin/prices`, enter the token, and use the
    form to set custom nightly rates for any date range.
+5. Visit `https://<your-domain>/admin/blocks` to mark date ranges as
+   unavailable for either property. Blocked dates are treated as booked and
+   cannot be selected by guests.
 
 ### How booking availability works
 

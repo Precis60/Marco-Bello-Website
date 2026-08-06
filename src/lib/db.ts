@@ -46,6 +46,15 @@ async function ensureSchema() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
         UNIQUE (property_id, date)
+      );
+
+      CREATE TABLE IF NOT EXISTS unavailable (
+        id SERIAL PRIMARY KEY,
+        property_id TEXT NOT NULL,
+        start_date DATE NOT NULL,
+        end_date DATE NOT NULL,
+        reason TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       )
     `.then(() => undefined);
   }
@@ -64,13 +73,17 @@ export interface BookedRange {
 export async function getBookedRanges(propertyId: string): Promise<BookedRange[]> {
   await ensureSchema();
   const sql = getSql();
-  const rows = await sql`
+  const bookingRows = (await sql`
     SELECT start_date, end_date FROM bookings
     WHERE property_id = ${propertyId}
       AND (status = 'confirmed' OR (status = 'pending' AND created_at > now() - interval '30 minutes'))
-    ORDER BY start_date ASC
-  `;
-  return rows as unknown as BookedRange[];
+  `) as unknown as BookedRange[];
+  const unavailableRows = (await sql`
+    SELECT start_date, end_date FROM unavailable WHERE property_id = ${propertyId}
+  `) as unknown as BookedRange[];
+  return [...bookingRows, ...unavailableRows].sort(
+    (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
+  );
 }
 
 export async function hasOverlap(
@@ -80,7 +93,7 @@ export async function hasOverlap(
 ): Promise<boolean> {
   await ensureSchema();
   const sql = getSql();
-  const rows = await sql`
+  const bookingRows = await sql`
     SELECT id FROM bookings
     WHERE property_id = ${propertyId}
       AND (status = 'confirmed' OR (status = 'pending' AND created_at > now() - interval '30 minutes'))
@@ -88,7 +101,15 @@ export async function hasOverlap(
       AND end_date > ${startDate}
     LIMIT 1
   `;
-  return rows.length > 0;
+  if (bookingRows.length > 0) return true;
+  const unavailableRows = await sql`
+    SELECT id FROM unavailable
+    WHERE property_id = ${propertyId}
+      AND start_date < ${endDate}
+      AND end_date > ${startDate}
+    LIMIT 1
+  `;
+  return unavailableRows.length > 0;
 }
 
 export async function createPendingBooking(params: {
@@ -215,4 +236,44 @@ export async function deletePricesForRange(
       AND date >= ${startDate}
       AND date < ${endDate}
   `;
+}
+
+export interface BlockedRange {
+  id: number;
+  property_id: string;
+  start_date: string;
+  end_date: string;
+  reason: string | null;
+}
+
+export async function getBlockedRanges(propertyId: string): Promise<BlockedRange[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, property_id, start_date, end_date, reason
+    FROM unavailable
+    WHERE property_id = ${propertyId}
+    ORDER BY start_date DESC
+  `;
+  return rows as unknown as BlockedRange[];
+}
+
+export async function createBlockedRange(params: {
+  propertyId: string;
+  startDate: string;
+  endDate: string;
+  reason?: string;
+}): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    INSERT INTO unavailable (property_id, start_date, end_date, reason)
+    VALUES (${params.propertyId}, ${params.startDate}, ${params.endDate}, ${params.reason ?? null})
+  `;
+}
+
+export async function deleteBlockedRange(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM unavailable WHERE id = ${id}`;
 }
