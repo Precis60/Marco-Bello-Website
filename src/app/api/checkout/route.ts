@@ -22,8 +22,14 @@ export async function POST(request: NextRequest) {
     propertyId?: string;
     startDate?: string;
     endDate?: string;
-    guestName?: string;
-    guestEmail?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    totalGuests?: number;
+    childrenAges?: string;
+    checkInTime?: string;
+    checkOutTime?: string;
     specialRequests?: string;
   };
   try {
@@ -32,10 +38,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const { propertyId, startDate, endDate, guestName, guestEmail, specialRequests } = body;
+  const {
+    propertyId,
+    startDate,
+    endDate,
+    firstName,
+    lastName,
+    email,
+    phone,
+    totalGuests,
+    childrenAges,
+    checkInTime,
+    checkOutTime,
+    specialRequests,
+  } = body;
   const property = propertyId ? getProperty(propertyId) : undefined;
 
-  if (!property || !startDate || !endDate || !guestName || !guestEmail) {
+  if (
+    !property ||
+    !startDate ||
+    !endDate ||
+    !firstName ||
+    !lastName ||
+    !email ||
+    !phone ||
+    typeof totalGuests !== "number" ||
+    totalGuests < 1
+  ) {
     return NextResponse.json({ error: "Please fill in all booking details." }, { status: 400 });
   }
 
@@ -61,8 +90,14 @@ export async function POST(request: NextRequest) {
       propertyId: property.id,
       startDate,
       endDate,
-      guestName,
-      guestEmail,
+      firstName,
+      lastName,
+      email,
+      phone,
+      totalGuests,
+      childrenAges,
+      checkInTime,
+      checkOutTime,
       specialRequests,
     });
 
@@ -72,7 +107,7 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      customer_email: guestEmail,
+      customer_email: email,
       line_items: [
         {
           price_data: {

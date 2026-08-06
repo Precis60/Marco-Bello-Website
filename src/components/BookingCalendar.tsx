@@ -26,9 +26,17 @@ export function BookingCalendar({
   const [bookedRanges, setBookedRanges] = useState<BookedRange[]>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(true);
   const [range, setRange] = useState<DateRange | undefined>();
-  const [name, setName] = useState("");
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [totalGuests, setTotalGuests] = useState<number | "">(1);
+  const [childrenAges, setChildrenAges] = useState("");
+  const [checkInTime, setCheckInTime] = useState("");
+  const [checkOutTime, setCheckOutTime] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
+
   const [dailyPrices, setDailyPrices] = useState<Record<string, number>>({});
   const [loadingPrices, setLoadingPrices] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -128,8 +136,8 @@ export function BookingCalendar({
       setError(`Minimum stay is ${minNights} nights.`);
       return;
     }
-    if (!name || !email) {
-      setError("Please enter your name and email.");
+    if (!firstName || !lastName || !email || !phone || totalGuests === "" || totalGuests < 1) {
+      setError("Please fill in your name, email, phone, and number of guests.");
       return;
     }
 
@@ -142,8 +150,14 @@ export function BookingCalendar({
           propertyId,
           startDate: format(range.from, "yyyy-MM-dd"),
           endDate: format(range.to, "yyyy-MM-dd"),
-          guestName: name,
-          guestEmail: email,
+          firstName,
+          lastName,
+          email,
+          phone,
+          totalGuests,
+          childrenAges,
+          checkInTime,
+          checkOutTime,
           specialRequests,
         }),
       });
@@ -200,35 +214,48 @@ export function BookingCalendar({
             {nights} night{nights > 1 ? "s" : ""} · ${total} total
           </div>
           {priceBreakdown.some((day) => day.price !== nightlyPrice) && (
-            <p className="mt-1 text-xs text-muted">
-              Based on custom nightly rates for these dates.
-            </p>
+            <p className="mt-1 text-xs text-muted">Based on custom nightly rates for these dates.</p>
           )}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+      <form onSubmit={handleSubmit} className="mt-6 grid gap-4 sm:grid-cols-2">
         <div>
           <label
-            htmlFor={`${propertyId}-name`}
+            htmlFor={`${propertyId}-firstName`}
             className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
           >
-            Name
+            First name
           </label>
           <input
-            id={`${propertyId}-name`}
+            id={`${propertyId}-firstName`}
             className="input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
             required
           />
         </div>
         <div>
           <label
+            htmlFor={`${propertyId}-lastName`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Last name
+          </label>
+          <input
+            id={`${propertyId}-lastName`}
+            className="input"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <label
             htmlFor={`${propertyId}-email`}
             className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
           >
-            Email
+            Email address
           </label>
           <input
             id={`${propertyId}-email`}
@@ -239,7 +266,85 @@ export function BookingCalendar({
             required
           />
         </div>
+        <div className="sm:col-span-2">
+          <label
+            htmlFor={`${propertyId}-phone`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Phone number
+          </label>
+          <input
+            id={`${propertyId}-phone`}
+            className="input"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+        </div>
         <div>
+          <label
+            htmlFor={`${propertyId}-guests`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Total guests
+          </label>
+          <input
+            id={`${propertyId}-guests`}
+            className="input"
+            type="number"
+            min={1}
+            value={totalGuests}
+            onChange={(e) => setTotalGuests(e.target.value === "" ? "" : Number(e.target.value))}
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${propertyId}-children`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Children&apos;s ages
+          </label>
+          <input
+            id={`${propertyId}-children`}
+            className="input"
+            value={childrenAges}
+            onChange={(e) => setChildrenAges(e.target.value)}
+            placeholder="e.g. 4, 7"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${propertyId}-checkin`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Requested check-in time
+          </label>
+          <input
+            id={`${propertyId}-checkin`}
+            className="input"
+            type="time"
+            value={checkInTime}
+            onChange={(e) => setCheckInTime(e.target.value)}
+          />
+        </div>
+        <div>
+          <label
+            htmlFor={`${propertyId}-checkout`}
+            className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
+          >
+            Requested check-out time
+          </label>
+          <input
+            id={`${propertyId}-checkout`}
+            className="input"
+            type="time"
+            value={checkOutTime}
+            onChange={(e) => setCheckOutTime(e.target.value)}
+          />
+        </div>
+        <div className="sm:col-span-2">
           <label
             htmlFor={`${propertyId}-requests`}
             className="text-xs font-semibold tracking-[0.18em] uppercase text-muted"
@@ -252,18 +357,22 @@ export function BookingCalendar({
             rows={3}
             value={specialRequests}
             onChange={(e) => setSpecialRequests(e.target.value)}
-            placeholder="Dietary requirements, accessibility needs, late check-in, etc."
+            placeholder="Dietary requirements, accessibility needs, anything else we should know..."
           />
         </div>
 
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        <div className="sm:col-span-2">
+          {error && <p className="text-xs text-red-600">{error}</p>}
+        </div>
 
-        <button type="submit" className="btn btn-primary" disabled={submitting || loadingPrices}>
-          {submitting ? "Redirecting to payment…" : loadingPrices ? "Loading rates…" : "Book & pay"}
-        </button>
-        <p className="text-xs text-muted">
-          You&apos;ll be redirected to Stripe to securely complete payment.
-        </p>
+        <div className="sm:col-span-2">
+          <button type="submit" className="btn btn-primary" disabled={submitting || loadingPrices}>
+            {submitting ? "Redirecting to payment…" : loadingPrices ? "Loading rates…" : "Book & pay"}
+          </button>
+          <p className="mt-2 text-xs text-muted">
+            You&apos;ll be redirected to Stripe to securely complete payment.
+          </p>
+        </div>
       </form>
     </div>
   );

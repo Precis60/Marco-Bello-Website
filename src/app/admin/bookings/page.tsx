@@ -12,8 +12,14 @@ interface BookingWithPrice {
   propertyName: string;
   startDate: string;
   endDate: string;
-  guestName: string;
-  guestEmail: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
+  totalGuests: number | null;
+  childrenAges: string | null;
+  checkInTime: string | null;
+  checkOutTime: string | null;
   specialRequests: string | null;
   status: string;
   createdAt: string;
@@ -163,7 +169,7 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="py-16 sm:py-20">
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="mx-auto max-w-6xl space-y-6">
         <AdminTabs />
 
         <div className="rounded-2xl border border-black/10 bg-surface p-6">
@@ -264,9 +270,9 @@ export default function AdminBookingsPage() {
                         <th className="p-3">Property</th>
                         <th className="p-3">Dates</th>
                         <th className="p-3">Client</th>
-                        <th className="p-3">Rate/night</th>
+                        <th className="p-3">Guests</th>
                         <th className="p-3">Total</th>
-                        <th className="p-3">Requests</th>
+                        <th className="p-3">Check in/out</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -277,22 +283,22 @@ export default function AdminBookingsPage() {
                             {b.startDate} → {b.endDate}
                           </td>
                           <td className="p-3">
-                            <div className="font-medium">{b.guestName}</div>
-                            <div className="text-xs text-foreground/70">{b.guestEmail}</div>
+                            <div className="font-medium">
+                              {b.firstName} {b.lastName}
+                            </div>
+                            <div className="text-xs text-foreground/70">{b.email}</div>
+                            <div className="text-xs text-foreground/70">{b.phone}</div>
                           </td>
-                          <td className="p-3">${b.dailyRate.toFixed(2)}</td>
+                          <td className="p-3">
+                            <div>{b.totalGuests ?? 1} guest{(b.totalGuests ?? 1) > 1 ? "s" : ""}</div>
+                            {b.childrenAges && (
+                              <div className="text-xs text-foreground/70">kids: {b.childrenAges}</div>
+                            )}
+                          </td>
                           <td className="p-3 font-semibold">${b.total}</td>
                           <td className="p-3">
-                            {b.specialRequests ? (
-                              <span
-                                className="block max-w-[180px] truncate"
-                                title={b.specialRequests}
-                              >
-                                {b.specialRequests}
-                              </span>
-                            ) : (
-                              <span className="text-foreground/50">—</span>
-                            )}
+                            <div className="text-xs">In: {b.checkInTime ?? "—"}</div>
+                            <div className="text-xs">Out: {b.checkOutTime ?? "—"}</div>
                           </td>
                         </tr>
                       ))}
@@ -302,6 +308,25 @@ export default function AdminBookingsPage() {
               )}
             </div>
           </div>
+
+          {filteredBookings.length > 0 && (
+            <div className="mt-6 space-y-4">
+              <h3 className="text-lg font-semibold tracking-tight">Special requests</h3>
+              {filteredBookings.map((b) => (
+                <div
+                  key={`requests-${b.id}`}
+                  className="rounded-xl border border-black/10 p-4 text-sm"
+                >
+                  <div className="font-medium">
+                    {b.firstName} {b.lastName} · {b.startDate} → {b.endDate}
+                  </div>
+                  <p className="mt-1 text-foreground">
+                    {b.specialRequests?.trim() ? b.specialRequests : "No special requests."}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

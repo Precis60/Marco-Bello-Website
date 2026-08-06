@@ -31,15 +31,34 @@ async function ensureSchema() {
         property_id TEXT NOT NULL,
         start_date DATE NOT NULL,
         end_date DATE NOT NULL,
-        guest_name TEXT NOT NULL,
-        guest_email TEXT NOT NULL,
+        guest_name TEXT,
+        guest_email TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        email TEXT,
+        phone TEXT,
+        total_guests INTEGER,
+        children_ages TEXT,
+        check_in_time TEXT,
+        check_out_time TEXT,
         special_requests TEXT,
         status TEXT NOT NULL DEFAULT 'pending',
         stripe_session_id TEXT UNIQUE,
         created_at TIMESTAMPTZ NOT NULL DEFAULT now()
       );
 
-      ALTER TABLE bookings ADD COLUMN IF NOT EXISTS special_requests TEXT;
+      ALTER TABLE bookings
+        ADD COLUMN IF NOT EXISTS guest_name TEXT,
+        ADD COLUMN IF NOT EXISTS guest_email TEXT,
+        ADD COLUMN IF NOT EXISTS first_name TEXT,
+        ADD COLUMN IF NOT EXISTS last_name TEXT,
+        ADD COLUMN IF NOT EXISTS email TEXT,
+        ADD COLUMN IF NOT EXISTS phone TEXT,
+        ADD COLUMN IF NOT EXISTS total_guests INTEGER,
+        ADD COLUMN IF NOT EXISTS children_ages TEXT,
+        ADD COLUMN IF NOT EXISTS check_in_time TEXT,
+        ADD COLUMN IF NOT EXISTS check_out_time TEXT,
+        ADD COLUMN IF NOT EXISTS special_requests TEXT;
 
       CREATE TABLE IF NOT EXISTS daily_prices (
         id SERIAL PRIMARY KEY,
@@ -119,15 +138,49 @@ export async function createPendingBooking(params: {
   propertyId: string;
   startDate: string;
   endDate: string;
-  guestName: string;
-  guestEmail: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  totalGuests: number;
+  childrenAges?: string;
+  checkInTime?: string;
+  checkOutTime?: string;
   specialRequests?: string;
 }): Promise<number> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`
-    INSERT INTO bookings (property_id, start_date, end_date, guest_name, guest_email, special_requests, status)
-    VALUES (${params.propertyId}, ${params.startDate}, ${params.endDate}, ${params.guestName}, ${params.guestEmail}, ${params.specialRequests ?? null}, 'pending')
+    INSERT INTO bookings (
+      property_id,
+      start_date,
+      end_date,
+      first_name,
+      last_name,
+      email,
+      phone,
+      total_guests,
+      children_ages,
+      check_in_time,
+      check_out_time,
+      special_requests,
+      status
+    )
+    VALUES (
+      ${params.propertyId},
+      ${params.startDate},
+      ${params.endDate},
+      ${params.firstName},
+      ${params.lastName},
+      ${params.email},
+      ${params.phone},
+      ${params.totalGuests},
+      ${params.childrenAges ?? null},
+      ${params.checkInTime ?? null},
+      ${params.checkOutTime ?? null},
+      ${params.specialRequests ?? null},
+      'pending'
+    )
     RETURNING id
   `;
   return (rows[0] as { id: number }).id;
@@ -287,8 +340,14 @@ export interface BookingRow {
   property_id: string;
   start_date: string;
   end_date: string;
-  guest_name: string;
-  guest_email: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  total_guests: number | null;
+  children_ages: string | null;
+  check_in_time: string | null;
+  check_out_time: string | null;
   special_requests: string | null;
   status: string;
   created_at: string;
@@ -298,7 +357,22 @@ export async function getAllBookings(): Promise<BookingRow[]> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`
-    SELECT id, property_id, start_date, end_date, guest_name, guest_email, special_requests, status, created_at
+    SELECT
+      id,
+      property_id,
+      start_date,
+      end_date,
+      first_name,
+      last_name,
+      email,
+      phone,
+      total_guests,
+      children_ages,
+      check_in_time,
+      check_out_time,
+      special_requests,
+      status,
+      created_at
     FROM bookings
     ORDER BY start_date DESC
   `;
