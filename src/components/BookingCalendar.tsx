@@ -184,7 +184,7 @@ export function BookingCalendar({
           {submitting ? "Redirecting to payment…" : "Book & pay"}
         </button>
         <p className="text-xs text-muted">
-          You'll be redirected to Stripe to securely complete payment.
+          You&apos;ll be redirected to Stripe to securely complete payment.
         </p>
       </form>
     </div>

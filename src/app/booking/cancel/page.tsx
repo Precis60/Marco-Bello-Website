@@ -12,7 +12,7 @@ export default function BookingCancelPage() {
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
             Your payment was not completed and you have not been charged.
-            You're welcome to choose new dates and try again.
+            You&apos;re welcome to choose new dates and try again.
           </p>
           <Link href="/rentals" className="btn btn-primary mt-8 inline-flex">
             Back to rentals

@@ -22,7 +22,7 @@ export default function AboutPage() {
               </div>
               <p className="mt-2 text-sm leading-6 text-muted">
                 Two holiday stays set among vineyards and gardens, just moments
-                from the Bellarine Peninsula's beaches and towns.
+                from the Bellarine Peninsula&apos;s beaches and towns.
               </p>
             </div>
             <div>

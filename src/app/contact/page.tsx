@@ -24,7 +24,7 @@ export default function ContactPage() {
               Enquire
             </h1>
             <p className="mt-4 text-base leading-7 text-muted">
-              Send a short note and I'll reply with availability, pricing, and
+              Send a short note and I&apos;ll reply with availability, pricing, and
               next steps.
             </p>
 
