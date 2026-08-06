@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { BookingCalendar } from "@/components/BookingCalendar";
 import { Container } from "@/components/Container";
+import { properties } from "@/lib/properties";
 
 export default function RentalsPage() {
   return (
@@ -52,6 +54,32 @@ export default function RentalsPage() {
               <div className="mt-6 h-40 rounded-xl bg-black/5" />
             </div>
           ))}
+        </div>
+
+        <div className="mt-16">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            Check availability & book
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
+            Select your dates below to see live availability and pay securely
+            online. The Main House and the Vineyard Tiny Home each have their
+            own calendar and are booked separately.
+          </p>
+
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <BookingCalendar
+              propertyId={properties["main-house"].id}
+              propertyName={properties["main-house"].name}
+              nightlyPrice={properties["main-house"].nightlyPrice}
+              minNights={properties["main-house"].minNights}
+            />
+            <BookingCalendar
+              propertyId={properties["vineyard-tiny-home"].id}
+              propertyName={properties["vineyard-tiny-home"].name}
+              nightlyPrice={properties["vineyard-tiny-home"].nightlyPrice}
+              minNights={properties["vineyard-tiny-home"].minNights}
+            />
+          </div>
         </div>
       </Container>
     </div>
