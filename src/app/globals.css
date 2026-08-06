@@ -40,6 +40,15 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* react-day-picker inherits the page text color; white day cells need dark text. */
+.rdp {
+  color: var(--foreground);
+}
+
+.rdp-day_button {
+  color: inherit;
+}
+
 @layer base {
   ::selection {
     background: color-mix(in srgb, var(--brand) 20%, transparent);
