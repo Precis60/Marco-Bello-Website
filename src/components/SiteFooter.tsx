@@ -24,10 +24,10 @@ export function SiteFooter() {
               </div>
               <div className="flex flex-col gap-2">
                 <Link className="footerlink" href="/rentals">
-                  Rental Availability
+                  Rentals
                 </Link>
                 <Link className="footerlink" href="/farm-sales">
-                  Honey, Wine, Olive Oil and small plants
+                  Farm sales
                 </Link>
                 <Link className="footerlink" href="/about">
                   About
@@ -45,7 +45,7 @@ export function SiteFooter() {
                 <a className="footerlink" href="mailto:admin@bellomarco.com.au">
                   admin@bellomarco.com.au
                 </a>
-                <a className="footerlink" href="tel:+61000000000">
+                <a className="footerlink" href="tel:+61413729663">
                   0413 729 663
                 </a>
               </div>

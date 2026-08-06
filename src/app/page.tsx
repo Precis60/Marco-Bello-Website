@@ -40,10 +40,11 @@ export default function Home() {
                     Featured
                   </div>
                   <div className="text-sm font-semibold">
-                    Replace with your hero property / landscape image
+                    Bello Marco Farm
                   </div>
                   <div className="text-sm text-muted">
-                    A short line about what makes your place unforgettable.
+                    A working farm on the Bellarine Peninsula, where country
+                    stays meet locally grown produce.
                   </div>
                 </div>
               </div>
@@ -63,8 +64,8 @@ export default function Home() {
                 Luxury rentals and curated farm sales
               </h2>
               <p className="mt-4 text-sm leading-6 text-muted">
-                Designed like a high-end property brand: clean layouts, strong
-                imagery, and clear pathways to enquire.
+                Peaceful rural accommodation and seasonal farm products, all
+                grown and produced on our Drysdale property.
               </p>
             </div>
           </div>
@@ -130,9 +131,11 @@ export default function Home() {
             </div>
             <div className="md:col-span-7">
               <p className="text-sm leading-7 text-muted">
-                Use this space to tell your story in an editorial tone: where
-                you are, what you value, and how guests and buyers can engage
-                with the farm. The goal is a luxury feel with practical clarity.
+                Bello Marco Farm is a family-run property on the Bellarine
+                Peninsula. We host guests in our holiday rentals and share what
+                we grow — honey, wine, olive oil, vegetables, herbs, fruit,
+                plants, and hay. Everything is produced with care for the land
+                and the people who visit it.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/about" className="btn btn-secondary">

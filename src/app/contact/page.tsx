@@ -5,7 +5,14 @@ import { Container } from "@/components/Container";
 export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert('Form submission is not yet implemented. Please contact us directly via email or phone.');
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const topic = formData.get("topic") as string;
+    const message = formData.get("message") as string;
+    const subject = `Enquiry from ${name} — ${topic}`;
+    const body = `Name: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}`;
+    window.location.href = `mailto:admin@bellomarco.com.au?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return (
@@ -73,8 +80,7 @@ export default function ContactPage() {
                 Send enquiry
               </button>
               <p className="text-xs text-muted">
-                This form is currently static. Next step is wiring it to email
-                or a CRM.
+                Submitting will open your email client with the enquiry details.
               </p>
             </div>
           </form>

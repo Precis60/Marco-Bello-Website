@@ -15,7 +15,14 @@ export default function RentalsPage() {
             vineyards and farm charm. The Main House provides a spacious, comfortable retreat perfect for families and 
             groups, while the Vineyard & Hobby Farm Tiny Home offers a cozy, peaceful escape overlooking rolling vines 
             and gardens. Guests can explore the property, enjoy local produce, and experience the quiet beauty of rural 
-            life, all just moments from the Bellarine Peninsula’s attractions.
+            life, all just moments from the Bellarine Peninsula’s attractions.{" "}
+            <Link href="/contact" className="underline underline-offset-2 hover:text-foreground">
+              get in touch
+            </Link>{" "}
+            or call{" "}
+            <a href="tel:+61413729663" className="underline underline-offset-2 hover:text-foreground">
+              0413 729 663
+            </a>.
           </p>
         </div>
 

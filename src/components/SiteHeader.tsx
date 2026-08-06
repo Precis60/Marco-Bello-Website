@@ -20,10 +20,10 @@ export function SiteHeader() {
 
         <nav className="hidden items-center gap-8 md:flex">
           <Link href="/rentals" className="navlink">
-            Rental Availability
+            Rentals
           </Link>
           <Link href="/farm-sales" className="navlink">
-            Honey, Wine, Olive Oil and Small Plants
+            Farm sales
           </Link>
           <Link href="/about" className="navlink">
             About
@@ -75,14 +75,14 @@ export function SiteHeader() {
                 className="navlink block py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Rental Availability
+                Rentals
               </Link>
               <Link
                 href="/farm-sales"
                 className="navlink block py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Honey, Wine, Olive Oil and Small Plants
+                Farm sales
               </Link>
               <Link
                 href="/about"
