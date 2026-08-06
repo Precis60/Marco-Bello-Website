@@ -1,13 +1,23 @@
-import { neon } from "@neondatabase/serverless";
+import postgres from "postgres";
+
+let sqlClient: ReturnType<typeof postgres> | null = null;
 
 function getSql() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error(
-      "DATABASE_URL is not set. Add a Postgres connection string (e.g. from the Vercel/Neon integration) to your environment variables.",
-    );
+  if (!sqlClient) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error(
+        "DATABASE_URL is not set. Add a Postgres connection string (e.g. from Supabase or Neon) to your environment variables.",
+      );
+    }
+    sqlClient = postgres(connectionString, {
+      ssl: "require",
+      // Required when connecting through a pooler in transaction mode (e.g.
+      // Supabase's pooled connection string on port 6543). Harmless otherwise.
+      prepare: false,
+    });
   }
-  return neon(connectionString);
+  return sqlClient;
 }
 
 let schemaReady: Promise<void> | null = null;

@@ -21,12 +21,23 @@ The booking calendars on `/rentals` (Main House and Vineyard Tiny Home) are
 fully functional: each shows live availability and lets guests pay online via
 Stripe Checkout. Two things need to be provisioned before it works:
 
-### 1. Database (Postgres via Neon)
+### 1. Database (Postgres — Supabase or Neon)
 
+The app connects with the standard `postgres` npm driver, so any Postgres
+provider works. No manual schema setup is needed either way — the `bookings`
+table is created automatically the first time the app queries it.
+
+**Option A — Supabase:**
+1. Create a project at https://supabase.com.
+2. Go to Project Settings > Database > Connection string, and copy the
+   **Transaction pooler** connection string (port 6543) — this is the one
+   suited to serverless functions, which open lots of short-lived connections.
+3. Set it as `DATABASE_URL` in Vercel.
+
+**Option B — Neon:**
 1. In the Vercel project, go to Storage > Create Database > Neon (Postgres).
 2. This automatically adds a `DATABASE_URL` environment variable to the
-   project. No manual schema setup is needed — the `bookings` table is
-   created automatically the first time the app queries it.
+   project.
 
 ### 2. Payments (Stripe)
 
