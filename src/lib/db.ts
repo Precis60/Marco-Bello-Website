@@ -25,60 +25,68 @@ let schemaReady: Promise<void> | null = null;
 async function ensureSchema() {
   if (!schemaReady) {
     const sql = getSql();
-    schemaReady = sql`
-      CREATE TABLE IF NOT EXISTS bookings (
-        id SERIAL PRIMARY KEY,
-        property_id TEXT NOT NULL,
-        start_date DATE NOT NULL,
-        end_date DATE NOT NULL,
-        guest_name TEXT,
-        guest_email TEXT,
-        first_name TEXT,
-        last_name TEXT,
-        email TEXT,
-        phone TEXT,
-        total_guests INTEGER,
-        children_ages TEXT,
-        check_in_time TEXT,
-        check_out_time TEXT,
-        special_requests TEXT,
-        status TEXT NOT NULL DEFAULT 'pending',
-        stripe_session_id TEXT UNIQUE,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      );
+    schemaReady = (async () => {
+      await sql`
+        CREATE TABLE IF NOT EXISTS bookings (
+          id SERIAL PRIMARY KEY,
+          property_id TEXT NOT NULL,
+          start_date DATE NOT NULL,
+          end_date DATE NOT NULL,
+          guest_name TEXT,
+          guest_email TEXT,
+          first_name TEXT,
+          last_name TEXT,
+          email TEXT,
+          phone TEXT,
+          total_guests INTEGER,
+          children_ages TEXT,
+          check_in_time TEXT,
+          check_out_time TEXT,
+          special_requests TEXT,
+          status TEXT NOT NULL DEFAULT 'pending',
+          stripe_session_id TEXT UNIQUE,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
 
-      ALTER TABLE bookings
-        ADD COLUMN IF NOT EXISTS guest_name TEXT,
-        ADD COLUMN IF NOT EXISTS guest_email TEXT,
-        ADD COLUMN IF NOT EXISTS first_name TEXT,
-        ADD COLUMN IF NOT EXISTS last_name TEXT,
-        ADD COLUMN IF NOT EXISTS email TEXT,
-        ADD COLUMN IF NOT EXISTS phone TEXT,
-        ADD COLUMN IF NOT EXISTS total_guests INTEGER,
-        ADD COLUMN IF NOT EXISTS children_ages TEXT,
-        ADD COLUMN IF NOT EXISTS check_in_time TEXT,
-        ADD COLUMN IF NOT EXISTS check_out_time TEXT,
-        ADD COLUMN IF NOT EXISTS special_requests TEXT;
+      await sql`
+        ALTER TABLE bookings
+          ADD COLUMN IF NOT EXISTS guest_name TEXT,
+          ADD COLUMN IF NOT EXISTS guest_email TEXT,
+          ADD COLUMN IF NOT EXISTS first_name TEXT,
+          ADD COLUMN IF NOT EXISTS last_name TEXT,
+          ADD COLUMN IF NOT EXISTS email TEXT,
+          ADD COLUMN IF NOT EXISTS phone TEXT,
+          ADD COLUMN IF NOT EXISTS total_guests INTEGER,
+          ADD COLUMN IF NOT EXISTS children_ages TEXT,
+          ADD COLUMN IF NOT EXISTS check_in_time TEXT,
+          ADD COLUMN IF NOT EXISTS check_out_time TEXT,
+          ADD COLUMN IF NOT EXISTS special_requests TEXT
+      `;
 
-      CREATE TABLE IF NOT EXISTS daily_prices (
-        id SERIAL PRIMARY KEY,
-        property_id TEXT NOT NULL,
-        date DATE NOT NULL,
-        price INTEGER NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-        UNIQUE (property_id, date)
-      );
+      await sql`
+        CREATE TABLE IF NOT EXISTS daily_prices (
+          id SERIAL PRIMARY KEY,
+          property_id TEXT NOT NULL,
+          date DATE NOT NULL,
+          price INTEGER NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          UNIQUE (property_id, date)
+        )
+      `;
 
-      CREATE TABLE IF NOT EXISTS unavailable (
-        id SERIAL PRIMARY KEY,
-        property_id TEXT NOT NULL,
-        start_date DATE NOT NULL,
-        end_date DATE NOT NULL,
-        reason TEXT,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-      )
-    `.then(() => undefined);
+      await sql`
+        CREATE TABLE IF NOT EXISTS unavailable (
+          id SERIAL PRIMARY KEY,
+          property_id TEXT NOT NULL,
+          start_date DATE NOT NULL,
+          end_date DATE NOT NULL,
+          reason TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
+    })();
   }
   return schemaReady;
 }
