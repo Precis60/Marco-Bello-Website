@@ -22,16 +22,56 @@ interface BookingWithPrice {
   breakdown: { date: string; price: number }[];
 }
 
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+function startOfMonth(date: Date) {
+  const d = new Date(date);
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function endOfMonth(date: Date) {
+  const d = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function overlapsMonth(start: string, end: string, month: Date) {
+  const monthStart = startOfMonth(month).getTime();
+  const monthEnd = endOfMonth(month).getTime();
+  const bookingStart = new Date(start).getTime();
+  const bookingEnd = new Date(end).getTime();
+  return bookingStart < monthEnd && bookingEnd > monthStart;
+}
+
 export default function AdminBookingsPage() {
   const [token, setToken] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
 
   const [bookings, setBookings] = useState<BookingWithPrice[] | null>(null);
   const [propertyFilter, setPropertyFilter] = useState<string>("all");
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [month, setMonth] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 7 }, (_, i) => current - 1 + i);
+  }, []);
 
   const login = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,15 +104,9 @@ export default function AdminBookingsPage() {
     if (!bookings) return [];
     return bookings.filter((b) => {
       const matchesProperty = propertyFilter === "all" || b.propertyId === propertyFilter;
-      if (!selectedDate) return matchesProperty;
-      const selected = new Date(selectedDate);
-      const start = new Date(b.startDate);
-      const end = new Date(b.endDate);
-      // selected is within the booking range (inclusive of start, exclusive of checkout)
-      const matchDate = selected >= start && selected < end;
-      return matchesProperty && matchDate;
+      return matchesProperty && overlapsMonth(b.startDate, b.endDate, month);
     });
-  }, [bookings, propertyFilter, selectedDate]);
+  }, [bookings, propertyFilter, month]);
 
   const bookedDays = useMemo<Matcher[]>(() => {
     if (!bookings) return [];
@@ -90,6 +124,18 @@ export default function AdminBookingsPage() {
         return days;
       });
   }, [bookings, propertyFilter]);
+
+  const prevMonth = () => {
+    const d = new Date(month);
+    d.setMonth(d.getMonth() - 1);
+    setMonth(d);
+  };
+
+  const nextMonth = () => {
+    const d = new Date(month);
+    d.setMonth(d.getMonth() + 1);
+    setMonth(d);
+  };
 
   if (!authenticated) {
     return (
@@ -123,7 +169,8 @@ export default function AdminBookingsPage() {
         <div className="rounded-2xl border border-black/10 bg-surface p-6">
           <h1 className="text-2xl font-semibold tracking-tight">Booking calendar</h1>
           <p className="mt-2 text-sm text-foreground">
-            Select a day to filter bookings by that date. Use the property dropdown to narrow results.
+            Use the arrows or month dropdowns to scroll through months. The table shows bookings that
+            overlap the selected month.
           </p>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -144,27 +191,61 @@ export default function AdminBookingsPage() {
                 ))}
               </select>
 
+              <div className="mt-4 flex items-center gap-2">
+                <select
+                  className="input"
+                  value={month.getMonth()}
+                  onChange={(e) => {
+                    const d = new Date(month);
+                    d.setMonth(Number(e.target.value));
+                    setMonth(d);
+                  }}
+                >
+                  {MONTH_NAMES.map((name, idx) => (
+                    <option key={name} value={idx}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="input"
+                  value={month.getFullYear()}
+                  onChange={(e) => {
+                    const d = new Date(month);
+                    d.setFullYear(Number(e.target.value));
+                    setMonth(d);
+                  }}
+                >
+                  {years.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <button onClick={prevMonth} className="btn btn-secondary">
+                  ← Previous
+                </button>
+                <div className="text-sm font-semibold text-foreground">
+                  {MONTH_NAMES[month.getMonth()]} {month.getFullYear()}
+                </div>
+                <button onClick={nextMonth} className="btn btn-secondary">
+                  Next →
+                </button>
+              </div>
+
               <div className="mt-4">
                 <DayPicker
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  onMonthChange={setMonth}
                   month={month}
+                  onMonthChange={setMonth}
                   modifiers={{ booked: bookedDays }}
                   modifiersClassNames={{ booked: "bg-brand/20 font-semibold" }}
                   numberOfMonths={1}
+                  hideNavigation
                 />
               </div>
-
-              {selectedDate && (
-                <button
-                  onClick={() => setSelectedDate(undefined)}
-                  className="mt-2 text-xs text-foreground underline"
-                >
-                  Clear date filter
-                </button>
-              )}
             </div>
 
             <div className="space-y-4">
@@ -172,7 +253,9 @@ export default function AdminBookingsPage() {
               {loading ? (
                 <p className="text-sm text-foreground">Loading bookings…</p>
               ) : filteredBookings.length === 0 ? (
-                <p className="text-sm text-foreground">No bookings match the selected filters.</p>
+                <p className="text-sm text-foreground">
+                  No bookings for {MONTH_NAMES[month.getMonth()]} {month.getFullYear()}.
+                </p>
               ) : (
                 <div className="overflow-auto rounded-xl border border-black/10">
                   <table className="w-full text-sm">
