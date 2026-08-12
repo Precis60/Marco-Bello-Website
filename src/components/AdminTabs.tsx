@@ -10,6 +10,7 @@ const tabs = [
   { href: "/admin/calendar", label: "Calendar" },
   { href: "/admin/tasks", label: "Tasks" },
   { href: "/admin/expenses", label: "Expenses" },
+  { href: "/admin/contacts", label: "Contacts" },
 ];
 
 export function AdminTabs() {
