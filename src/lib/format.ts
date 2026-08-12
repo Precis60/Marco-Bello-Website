@@ -15,16 +15,21 @@ export function formatCurrency(amount: number) {
   return currencyFormatter.format(amount);
 }
 
-/** Formats an ISO `yyyy-mm-dd` date as e.g. "Fri 14 Aug 2026", ignoring time zones. */
-export function formatDate(isoDate: string) {
-  const [year, month, day] = isoDate.slice(0, 10).split("-").map(Number);
-  if (!year || !month || !day) return isoDate;
+/** Reduces a date string or ISO timestamp (as returned by the database) to `yyyy-mm-dd`. */
+export function isoDate(value: string) {
+  return value.slice(0, 10);
+}
+
+/** Formats a date string as e.g. "Fri 14 Aug 2026", ignoring time zones. */
+export function formatDate(value: string) {
+  const [year, month, day] = isoDate(value).split("-").map(Number);
+  if (!year || !month || !day) return value;
   return dateFormatter.format(new Date(year, month - 1, day));
 }
 
 export function nightsBetween(startIso: string, endIso: string) {
-  const start = new Date(`${startIso}T00:00:00`).getTime();
-  const end = new Date(`${endIso}T00:00:00`).getTime();
+  const start = new Date(`${isoDate(startIso)}T00:00:00`).getTime();
+  const end = new Date(`${isoDate(endIso)}T00:00:00`).getTime();
   if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return 0;
   return Math.round((end - start) / 86_400_000);
 }
