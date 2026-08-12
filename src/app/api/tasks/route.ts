@@ -29,6 +29,11 @@ export async function POST(request: NextRequest) {
     assignee?: string;
     dueDate?: string;
     priority?: string;
+    status?: string;
+    area?: string;
+    workType?: string;
+    minutes?: number | null;
+    createdBy?: string;
   };
 
   try {
@@ -42,11 +47,18 @@ export async function POST(request: NextRequest) {
 
   const title = body.title?.trim();
   const priority = body.priority ?? "medium";
+  const status = body.status ?? "open";
   if (!title) {
     return NextResponse.json({ error: "Enter a task title." }, { status: 400 });
   }
   if (!PRIORITIES.includes(priority)) {
     return NextResponse.json({ error: "Unknown priority." }, { status: 400 });
+  }
+  if (!STATUSES.includes(status)) {
+    return NextResponse.json({ error: "Unknown status." }, { status: 400 });
+  }
+  if (body.minutes != null && (!Number.isInteger(body.minutes) || body.minutes < 0)) {
+    return NextResponse.json({ error: "Time spent must be a whole number." }, { status: 400 });
   }
   if (body.propertyId && !getProperty(body.propertyId)) {
     return NextResponse.json({ error: "Unknown property." }, { status: 400 });
@@ -60,6 +72,11 @@ export async function POST(request: NextRequest) {
       assignee: body.assignee?.trim() || null,
       dueDate: body.dueDate || null,
       priority,
+      status,
+      area: body.area?.trim() || null,
+      workType: body.workType?.trim() || null,
+      minutes: body.minutes ?? null,
+      createdBy: body.createdBy?.trim() || null,
     });
     return NextResponse.json({ ok: true });
   } catch (error) {
