@@ -135,6 +135,21 @@ async function ensureSchema() {
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
       `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS contacts (
+          id SERIAL PRIMARY KEY,
+          first_name TEXT NOT NULL,
+          last_name TEXT NOT NULL,
+          company TEXT,
+          position TEXT,
+          email TEXT,
+          phone TEXT,
+          address TEXT,
+          notes TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
     })();
   }
   return schemaReady;
@@ -722,4 +737,79 @@ export async function deleteCalendarEvent(id: number): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`DELETE FROM calendar_events WHERE id = ${id}`;
+}
+
+export interface ContactRow {
+  id: number;
+  first_name: string;
+  last_name: string;
+  company: string | null;
+  position: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  notes: string | null;
+}
+
+export interface ContactInput {
+  firstName: string;
+  lastName: string;
+  company?: string | null;
+  position?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  notes?: string | null;
+}
+
+export async function getContacts(): Promise<ContactRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, first_name, last_name, company, position, email, phone, address, notes
+    FROM contacts
+    ORDER BY lower(last_name) ASC, lower(first_name) ASC
+  `;
+  return rows as unknown as ContactRow[];
+}
+
+export async function createContact(contact: ContactInput): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    INSERT INTO contacts (first_name, last_name, company, position, email, phone, address, notes)
+    VALUES (
+      ${contact.firstName},
+      ${contact.lastName},
+      ${contact.company ?? null},
+      ${contact.position ?? null},
+      ${contact.email ?? null},
+      ${contact.phone ?? null},
+      ${contact.address ?? null},
+      ${contact.notes ?? null}
+    )
+  `;
+}
+
+export async function updateContact(id: number, contact: ContactInput): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    UPDATE contacts
+    SET first_name = ${contact.firstName},
+        last_name = ${contact.lastName},
+        company = ${contact.company ?? null},
+        position = ${contact.position ?? null},
+        email = ${contact.email ?? null},
+        phone = ${contact.phone ?? null},
+        address = ${contact.address ?? null},
+        notes = ${contact.notes ?? null}
+    WHERE id = ${id}
+  `;
+}
+
+export async function deleteContact(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM contacts WHERE id = ${id}`;
 }
