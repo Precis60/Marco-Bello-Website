@@ -169,6 +169,11 @@ body {
   font-weight: 600;
 }
 
+.calendar .day-task .rdp-day_button {
+  box-shadow: inset 0 -4px 0 0 #ddd6fe;
+  font-weight: 600;
+}
+
 @layer base {
   ::selection {
     background: color-mix(in srgb, var(--brand) 20%, transparent);

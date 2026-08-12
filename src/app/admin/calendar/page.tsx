@@ -7,6 +7,7 @@ import { Calendar } from "@/components/Calendar";
 import { DateField } from "@/components/DateField";
 import { formatDate, isoDate } from "@/lib/format";
 import { properties } from "@/lib/properties";
+import { formatMinutes, statusLabel } from "@/lib/work";
 
 interface CalendarEvent {
   id: number;
@@ -21,6 +22,19 @@ interface CalendarEvent {
   contractor: string | null;
   contact: string | null;
   notes: string | null;
+}
+
+interface Task {
+  id: number;
+  property_id: string | null;
+  title: string;
+  details: string | null;
+  assignee: string | null;
+  due_date: string | null;
+  status: string;
+  area: string | null;
+  work_type: string | null;
+  minutes: number | null;
 }
 
 interface Stay {
@@ -94,6 +108,7 @@ export default function AdminCalendarPage() {
   const [authenticated, setAuthenticated] = useState(false);
 
   const [events, setEvents] = useState<CalendarEvent[] | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [stays, setStays] = useState<Stay[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [month, setMonth] = useState<Date>(new Date());
@@ -131,6 +146,13 @@ export default function AdminCalendarPage() {
     setError(null);
   };
 
+  const loadTasks = async () => {
+    const res = await fetch("/api/tasks", { headers: { "x-admin-token": token } });
+    if (!res.ok) return;
+    const data = await res.json();
+    setTasks((data.tasks ?? []).filter((task: Task) => task.due_date));
+  };
+
   const loadStays = async () => {
     const res = await fetch("/api/bookings", { headers: { "x-admin-token": token } });
     if (!res.ok) return;
@@ -141,6 +163,7 @@ export default function AdminCalendarPage() {
   useEffect(() => {
     if (!authenticated) return;
     loadEvents();
+    loadTasks();
     loadStays();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
@@ -154,6 +177,21 @@ export default function AdminCalendarPage() {
           (propertyFilter === "farm" ? e.property_id === null : e.property_id === propertyFilter)),
     );
   }, [events, kindFilter, propertyFilter]);
+
+  /** Tasks assigned inside the visible month, honouring the property filter. */
+  const monthTasks = useMemo(() => {
+    const prefix = `${month.getFullYear()}-${`${month.getMonth() + 1}`.padStart(2, "0")}`;
+    return tasks
+      .filter(
+        (task) =>
+          isoDate(task.due_date ?? "").startsWith(prefix) &&
+          (propertyFilter === "all" ||
+            (propertyFilter === "farm"
+              ? task.property_id === null
+              : task.property_id === propertyFilter)),
+      )
+      .sort((a, b) => isoDate(a.due_date ?? "").localeCompare(isoDate(b.due_date ?? "")));
+  }, [tasks, month, propertyFilter]);
 
   const monthEntries = useMemo(() => {
     const prefix = `${month.getFullYear()}-${`${month.getMonth() + 1}`.padStart(2, "0")}`;
@@ -170,8 +208,14 @@ export default function AdminCalendarPage() {
       "day-scheduled": [],
       "day-confirmed": [],
       "day-contractor": [],
+      "day-task": [],
       "day-stay": [],
     };
+
+    for (const task of tasks) {
+      if (task.status === "done" || !task.due_date) continue;
+      byKind["day-task"].push(localDate(task.due_date));
+    }
 
     for (const e of visible) {
       if (e.status === "cancelled") continue;
@@ -187,7 +231,7 @@ export default function AdminCalendarPage() {
     }
 
     return byKind;
-  }, [visible, stays]);
+  }, [visible, tasks, stays]);
 
   const addEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -324,6 +368,7 @@ export default function AdminCalendarPage() {
                 "day-scheduled": "day-scheduled",
                 "day-confirmed": "day-confirmed",
                 "day-contractor": "day-contractor",
+                "day-task": "day-task",
                 "day-stay": "day-stay",
               }}
               className="mx-auto"
@@ -335,6 +380,10 @@ export default function AdminCalendarPage() {
                   {k.label}
                 </span>
               ))}
+              <span className="flex items-center gap-2">
+                <span className="size-3 rounded-full bg-violet-200" aria-hidden="true" />
+                Task
+              </span>
               <span className="flex items-center gap-2">
                 <span className="size-3 rounded-full bg-black/15" aria-hidden="true" />
                 Guest stay
@@ -348,7 +397,7 @@ export default function AdminCalendarPage() {
             </h3>
             {events === null ? (
               <p className="mt-4 text-sm text-muted">Loading…</p>
-            ) : monthEntries.length === 0 ? (
+            ) : monthEntries.length === 0 && monthTasks.length === 0 ? (
               <p className="mt-4 text-sm text-muted">Nothing scheduled this month.</p>
             ) : (
               <ul className="mt-4 space-y-3">
@@ -414,6 +463,44 @@ export default function AdminCalendarPage() {
                   </li>
                 ))}
               </ul>
+            )}
+
+            {monthTasks.length > 0 && (
+              <div className="mt-8 border-t border-black/10 pt-6">
+                <h4 className="text-sm font-semibold">Tasks assigned</h4>
+                <ul className="mt-4 space-y-3">
+                  {monthTasks.map((task) => (
+                    <li key={task.id} className="rounded-xl border border-black/10 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold">{task.title}</p>
+                          <p className="mt-1 text-xs text-muted">
+                            {[
+                              task.area,
+                              task.work_type,
+                              task.property_id ? properties[task.property_id]?.name : "Whole farm",
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                        </div>
+                        <span className="rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-violet-800 uppercase">
+                          {statusLabel(task.status)}
+                        </span>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                        <span>{formatDate(task.due_date ?? "")}</span>
+                        {task.assignee && <span>{task.assignee}</span>}
+                        {task.minutes != null && <span>{formatMinutes(task.minutes)}</span>}
+                      </div>
+                      {task.details && <p className="mt-3 text-sm text-muted">{task.details}</p>}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-4 text-xs text-muted">
+                  Tasks are added and updated on the Tasks page.
+                </p>
+              </div>
             )}
           </div>
         </div>

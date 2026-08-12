@@ -117,6 +117,14 @@ async function ensureSchema() {
         )
       `;
 
+      await sql`
+        ALTER TABLE tasks
+          ADD COLUMN IF NOT EXISTS area TEXT,
+          ADD COLUMN IF NOT EXISTS work_type TEXT,
+          ADD COLUMN IF NOT EXISTS minutes INTEGER,
+          ADD COLUMN IF NOT EXISTS created_by TEXT
+      `;
+
       // end_date is the last day of the entry (inclusive), unlike bookings.
       await sql`
         CREATE TABLE IF NOT EXISTS calendar_events (
@@ -619,6 +627,10 @@ export interface TaskRow {
   due_date: string | null;
   priority: string;
   status: string;
+  area: string | null;
+  work_type: string | null;
+  minutes: number | null;
+  created_by: string | null;
   created_at: string;
   completed_at: string | null;
 }
@@ -628,7 +640,7 @@ export async function getTasks(): Promise<TaskRow[]> {
   const sql = getSql();
   const rows = await sql`
     SELECT id, property_id, title, details, assignee, due_date, priority, status,
-           created_at, completed_at
+           area, work_type, minutes, created_by, created_at, completed_at
     FROM tasks
     ORDER BY due_date ASC NULLS LAST, id DESC
   `;
@@ -642,18 +654,31 @@ export async function createTask(params: {
   assignee?: string | null;
   dueDate?: string | null;
   priority: string;
+  status?: string;
+  area?: string | null;
+  workType?: string | null;
+  minutes?: number | null;
+  createdBy?: string | null;
 }): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`
-    INSERT INTO tasks (property_id, title, details, assignee, due_date, priority)
+    INSERT INTO tasks (
+      property_id, title, details, assignee, due_date, priority, status,
+      area, work_type, minutes, created_by
+    )
     VALUES (
       ${params.propertyId},
       ${params.title},
       ${params.details ?? null},
       ${params.assignee ?? null},
       ${params.dueDate ?? null},
-      ${params.priority}
+      ${params.priority},
+      ${params.status ?? "open"},
+      ${params.area ?? null},
+      ${params.workType ?? null},
+      ${params.minutes ?? null},
+      ${params.createdBy ?? null}
     )
   `;
 }
