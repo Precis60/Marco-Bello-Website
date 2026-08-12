@@ -2,8 +2,9 @@
 
 import { differenceInCalendarDays, format, startOfDay } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
-import { DayPicker, type DateRange, type Matcher } from "react-day-picker";
-import "react-day-picker/style.css";
+import { type DateRange, type Matcher } from "react-day-picker";
+
+import { Calendar } from "@/components/Calendar";
 
 interface BookedRange {
   start_date: string;
@@ -187,7 +188,7 @@ export function BookingCalendar({
         {loadingAvailability ? (
           <div className="text-sm text-muted">Loading availability…</div>
         ) : (
-          <DayPicker
+          <Calendar
             mode="range"
             selected={range}
             onSelect={(selected) => {
@@ -201,6 +202,7 @@ export function BookingCalendar({
             }}
             disabled={disabledDays}
             numberOfMonths={1}
+            className="mx-auto"
           />
         )}
       </div>
@@ -214,7 +216,9 @@ export function BookingCalendar({
             {nights} night{nights > 1 ? "s" : ""} · ${total} total
           </div>
           {priceBreakdown.some((day) => day.price !== nightlyPrice) && (
-            <p className="mt-1 text-xs text-muted">Based on custom nightly rates for these dates.</p>
+            <p className="mt-1 text-xs text-muted">
+              Based on custom nightly rates for these dates.
+            </p>
           )}
         </div>
       )}
@@ -367,7 +371,11 @@ export function BookingCalendar({
 
         <div className="sm:col-span-2">
           <button type="submit" className="btn btn-primary" disabled={submitting || loadingPrices}>
-            {submitting ? "Redirecting to payment…" : loadingPrices ? "Loading rates…" : "Book & pay"}
+            {submitting
+              ? "Redirecting to payment…"
+              : loadingPrices
+                ? "Loading rates…"
+                : "Book & pay"}
           </button>
           <p className="mt-2 text-xs text-muted">
             You&apos;ll be redirected to Stripe to securely complete payment.

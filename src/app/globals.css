@@ -40,13 +40,107 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* react-day-picker inherits the page text color; white day cells need dark text. */
-.rdp {
+/* Brand styling for every react-day-picker calendar, rendered via <Calendar />. */
+.calendar {
+  --rdp-accent-color: var(--brand);
+  --rdp-accent-background-color: color-mix(in srgb, var(--brand) 12%, transparent);
+  --rdp-day-height: 2.5rem;
+  --rdp-day-width: 2.5rem;
+  --rdp-day_button-height: 2.25rem;
+  --rdp-day_button-width: 2.25rem;
+  --rdp-day_button-border-radius: 999px;
+  --rdp-day_button-border: 1px solid transparent;
+  --rdp-selected-border: none;
+  --rdp-today-color: var(--brand-2);
+  --rdp-outside-opacity: 0.35;
+  --rdp-disabled-opacity: 0.3;
+  --rdp-weekday-opacity: 1;
+  --rdp-nav_button-height: 2rem;
+  --rdp-nav_button-width: 2rem;
+  --rdp-range_middle-background-color: color-mix(in srgb, var(--brand) 10%, transparent);
+  --rdp-range_middle-color: var(--foreground);
+  color: var(--foreground);
+  font-size: 0.875rem;
+}
+
+.calendar .rdp-month_caption {
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid rgb(0 0 0 / 0.08);
+}
+
+.calendar .rdp-caption_label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.calendar .rdp-nav {
+  gap: 0.25rem;
+}
+
+.calendar .rdp-button_previous,
+.calendar .rdp-button_next {
+  border: 1px solid rgb(0 0 0 / 0.12);
+  border-radius: 999px;
+  transition: background-color 150ms;
+}
+
+.calendar .rdp-button_previous:hover:not(:disabled),
+.calendar .rdp-button_next:hover:not(:disabled) {
+  background-color: rgb(0 0 0 / 0.05);
+}
+
+.calendar .rdp-chevron {
+  fill: var(--brand);
+}
+
+.calendar .rdp-weekday {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.calendar .rdp-day_button {
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 150ms,
+    color 150ms;
+}
+
+.calendar .rdp-day:not(.rdp-selected, .rdp-disabled) .rdp-day_button:hover {
+  background-color: rgb(0 0 0 / 0.05);
+}
+
+.calendar .rdp-today:not(.rdp-selected) .rdp-day_button {
+  border-color: var(--brand-2);
+  font-weight: 700;
+}
+
+.calendar .rdp-selected .rdp-day_button {
+  background-color: var(--brand);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.calendar .rdp-range_middle .rdp-day_button {
+  border-radius: 0;
   color: var(--foreground);
 }
 
-.rdp-day_button {
-  color: inherit;
+.calendar .rdp-disabled .rdp-day_button {
+  text-decoration: line-through;
+}
+
+.calendar .booked-day .rdp-day_button {
+  background-color: color-mix(in srgb, var(--brand) 22%, transparent);
+  font-weight: 600;
+  text-decoration: none;
+  opacity: 1;
 }
 
 @layer base {

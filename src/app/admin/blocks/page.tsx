@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { AdminLogin } from "@/components/AdminLogin";
+import { DateField } from "@/components/DateField";
 import { formatDate, nightsBetween } from "@/lib/format";
 import { properties } from "@/lib/properties";
 
@@ -156,33 +157,22 @@ export default function AdminBlocksPage() {
               placeholder="e.g. maintenance"
             />
           </div>
-          <div>
-            <label className="field-label" htmlFor="block-start">
-              First night blocked
-            </label>
-            <input
-              id="block-start"
-              type="date"
-              className="input"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="block-end">
-              Available again from
-            </label>
-            <input
-              id="block-end"
-              type="date"
-              min={start || undefined}
-              className="input"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              required
-            />
-          </div>
+          <DateField
+            id="block-start"
+            label="First night blocked"
+            value={start}
+            onChange={(value) => {
+              setStart(value);
+              if (end && value && end <= value) setEnd("");
+            }}
+          />
+          <DateField
+            id="block-end"
+            label="Available again from"
+            value={end}
+            min={start || undefined}
+            onChange={setEnd}
+          />
           <div className="mt-2 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 pt-5 sm:col-span-2">
             <p className="text-sm text-muted">
               {nights > 0
