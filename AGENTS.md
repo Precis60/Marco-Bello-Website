@@ -74,6 +74,10 @@ local development, copy it to `.env.local` and fill in the values.
 6. Visit `https://<your-domain>/admin/bookings` to view all bookings in a
    calendar, including date range, client name, daily rate, total price, and
    special requests.
+7. `/admin/calendar`, `/admin/tasks` and `/admin/expenses` use the same token
+   for the operations calendar (events, scheduled/confirmed works, contractor
+   bookings), the task board, and the expense tracker. Their tables are also
+   created automatically on first query.
 
 ### How booking availability works
 
