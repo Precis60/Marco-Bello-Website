@@ -77,7 +77,43 @@ body {
   }
 
   .input {
-    @apply mt-2 w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-sm outline-none ring-0 transition focus:border-black/30;
+    @apply mt-2 min-h-11 w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20;
     color: #000000;
+  }
+
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .card {
+    @apply rounded-2xl border border-black/10 bg-surface p-6 shadow-[0_1px_3px_rgba(22,22,22,0.05)] sm:p-8;
+  }
+
+  .card-title {
+    @apply text-lg font-semibold tracking-tight sm:text-xl;
+  }
+
+  .card-subtitle {
+    @apply mt-2 max-w-2xl text-sm leading-relaxed text-muted;
+  }
+
+  .field-label {
+    @apply block text-[11px] font-semibold tracking-[0.18em] uppercase text-muted;
+  }
+
+  .data-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  .data-table thead th {
+    @apply bg-black/[0.04] px-4 py-3 text-left text-[11px] font-semibold tracking-[0.14em] uppercase text-muted;
+  }
+
+  .data-table tbody td {
+    @apply border-t border-black/10 px-4 py-3 align-middle;
+  }
+
+  .data-table tbody tr:hover td {
+    @apply bg-black/[0.02];
   }
 }

@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { DayPicker, type Matcher } from "react-day-picker";
 
-import { AdminTabs } from "@/components/AdminTabs";
+import { AdminLogin } from "@/components/AdminLogin";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { properties } from "@/lib/properties";
 
 interface BookingWithPrice {
@@ -210,60 +211,51 @@ export default function AdminBookingsPage() {
 
   if (!authenticated) {
     return (
-      <div className="py-16 sm:py-20">
-        <div className="mx-auto max-w-md rounded-2xl border border-black/10 bg-surface p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Admin login</h1>
-          <p className="mt-2 text-sm text-foreground">Enter the admin token to view bookings.</p>
-          <form onSubmit={login} className="mt-6 grid gap-4">
-            <input
-              type="password"
-              className="input"
-              placeholder="Admin token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              required
-            />
-            <button type="submit" className="btn btn-primary">
-              Continue
-            </button>
-          </form>
-        </div>
-      </div>
+      <AdminLogin
+        token={token}
+        onTokenChange={setToken}
+        onSubmit={login}
+        description="Enter the admin token to view and edit bookings."
+        error={error}
+      />
     );
   }
 
   return (
-    <div className="py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <AdminTabs />
+    <>
+      <section className="card">
+        <h2 className="card-title">Booking calendar</h2>
+        <p className="card-subtitle">
+          Use the arrows or month dropdowns to move between months. The table lists bookings that
+          overlap the selected month.
+        </p>
 
-        <div className="rounded-2xl border border-black/10 bg-surface p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Booking calendar</h1>
-          <p className="mt-2 text-sm text-foreground">
-            Use the arrows or month dropdowns to scroll through months. The table shows bookings that
-            overlap the selected month.
-          </p>
+        <div className="mt-8 grid gap-8 lg:grid-cols-2">
+          <div>
+            <label className="field-label" htmlFor="booking-property">
+              Property
+            </label>
+            <select
+              id="booking-property"
+              className="input"
+              value={propertyFilter}
+              onChange={(e) => setPropertyFilter(e.target.value)}
+            >
+              <option value="all">All properties</option>
+              {Object.values(properties).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                Property
-              </label>
-              <select
-                className="input"
-                value={propertyFilter}
-                onChange={(e) => setPropertyFilter(e.target.value)}
-              >
-                <option value="all">All properties</option>
-                {Object.values(properties).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-
-              <div className="mt-4 flex items-center gap-2">
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <div>
+                <label className="field-label" htmlFor="booking-month">
+                  Month
+                </label>
                 <select
+                  id="booking-month"
                   className="input"
                   value={month.getMonth()}
                   onChange={(e) => {
@@ -278,7 +270,13 @@ export default function AdminBookingsPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="field-label" htmlFor="booking-year">
+                  Year
+                </label>
                 <select
+                  id="booking-year"
                   className="input"
                   value={month.getFullYear()}
                   onChange={(e) => {
@@ -294,306 +292,298 @@ export default function AdminBookingsPage() {
                   ))}
                 </select>
               </div>
-
-              <div className="mt-4 flex items-center justify-between gap-2">
-                <button onClick={prevMonth} className="btn btn-secondary">
-                  ← Previous
-                </button>
-                <div className="text-sm font-semibold text-foreground">
-                  {MONTH_NAMES[month.getMonth()]} {month.getFullYear()}
-                </div>
-                <button onClick={nextMonth} className="btn btn-secondary">
-                  Next →
-                </button>
-              </div>
-
-              <div className="mt-4">
-                <DayPicker
-                  month={month}
-                  onMonthChange={setMonth}
-                  modifiers={{ booked: bookedDays }}
-                  modifiersClassNames={{ booked: "bg-brand/20 font-semibold" }}
-                  numberOfMonths={1}
-                  hideNavigation
-                />
-              </div>
             </div>
 
-            <div className="space-y-4">
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              {loading ? (
-                <p className="text-sm text-foreground">Loading bookings…</p>
-              ) : filteredBookings.length === 0 ? (
-                <p className="text-sm text-foreground">
-                  No bookings for {MONTH_NAMES[month.getMonth()]} {month.getFullYear()}.
-                </p>
-              ) : (
-                <div className="overflow-auto rounded-xl border border-black/10">
-                  <table className="w-full text-sm">
-                    <thead className="bg-black/5 text-left text-xs uppercase text-foreground">
-                      <tr>
-                        <th className="p-3">Property</th>
-                        <th className="p-3">Dates</th>
-                        <th className="p-3">Client</th>
-                        <th className="p-3">Guests</th>
-                        <th className="p-3">Total</th>
-                        <th className="p-3">Status</th>
-                        <th className="p-3"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBookings.map((b) => (
-                        <tr key={b.id} className="border-t border-black/10">
-                          <td className="p-3">{b.propertyName}</td>
-                          <td className="p-3 whitespace-nowrap">
-                            {b.startDate} → {b.endDate}
-                          </td>
-                          <td className="p-3">
-                            <div className="font-medium">
-                              {b.firstName} {b.lastName}
-                            </div>
-                            <div className="text-xs text-foreground/70">{b.email}</div>
-                            <div className="text-xs text-foreground/70">{b.phone}</div>
-                          </td>
-                          <td className="p-3">
-                            <div>{b.totalGuests ?? 1} guest{(b.totalGuests ?? 1) > 1 ? "s" : ""}</div>
-                            {b.childrenAges && (
-                              <div className="text-xs text-foreground/70">kids: {b.childrenAges}</div>
-                            )}
-                          </td>
-                          <td className="p-3 font-semibold">${b.total}</td>
-                          <td className="p-3">
-                            <span
-                              className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                                b.status === "confirmed"
-                                  ? "bg-green-100 text-green-800"
-                                  : b.status === "pending"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-gray-100 text-gray-800"
-                              }`}
-                            >
-                              {b.status}
-                            </span>
-                          </td>
-                          <td className="p-3">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => setEditing(b)}
-                                className="text-xs font-semibold text-foreground hover:underline"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => removeBooking(b.id)}
-                                className="text-xs font-semibold text-red-600 hover:underline"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+            <div className="mt-6 flex items-center justify-between gap-2">
+              <button onClick={prevMonth} className="btn btn-secondary" aria-label="Previous month">
+                ← Previous
+              </button>
+              <div className="text-sm font-semibold">
+                {MONTH_NAMES[month.getMonth()]} {month.getFullYear()}
+              </div>
+              <button onClick={nextMonth} className="btn btn-secondary" aria-label="Next month">
+                Next →
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-xl border border-black/10 p-4">
+              <DayPicker
+                month={month}
+                onMonthChange={setMonth}
+                modifiers={{ booked: bookedDays }}
+                modifiersClassNames={{ booked: "bg-brand/20 font-semibold" }}
+                numberOfMonths={1}
+                hideNavigation
+              />
             </div>
           </div>
 
-          {filteredBookings.length > 0 && (
-            <div className="mt-6 space-y-4">
-              <h3 className="text-lg font-semibold tracking-tight">Special requests</h3>
+          <div className="space-y-4">
+            {error && (
+              <p className="rounded-xl border border-red-600/20 bg-red-600/10 px-4 py-3 text-sm text-red-700">
+                {error}
+              </p>
+            )}
+            {loading ? (
+              <p className="text-sm text-muted">Loading bookings…</p>
+            ) : filteredBookings.length === 0 ? (
+              <p className="text-sm text-muted">
+                No bookings for {MONTH_NAMES[month.getMonth()]} {month.getFullYear()}.
+              </p>
+            ) : (
+              <div className="overflow-auto rounded-xl border border-black/10">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>Property</th>
+                      <th>Dates</th>
+                      <th>Client</th>
+                      <th>Guests</th>
+                      <th className="text-right">Total</th>
+                      <th>Status</th>
+                      <th className="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBookings.map((b) => (
+                      <tr key={b.id}>
+                        <td>{b.propertyName}</td>
+                        <td className="whitespace-nowrap">
+                          {formatDate(b.startDate)}
+                          <div className="text-xs text-muted">to {formatDate(b.endDate)}</div>
+                        </td>
+                        <td>
+                          <div className="font-medium">
+                            {b.firstName} {b.lastName}
+                          </div>
+                          <div className="text-xs text-muted">{b.email}</div>
+                          <div className="text-xs text-muted">{b.phone}</div>
+                        </td>
+                        <td>
+                          <div>
+                            {b.totalGuests ?? 1} guest
+                            {(b.totalGuests ?? 1) > 1 ? "s" : ""}
+                          </div>
+                          {b.childrenAges && (
+                            <div className="text-xs text-muted">kids: {b.childrenAges}</div>
+                          )}
+                        </td>
+                        <td className="text-right font-semibold tabular-nums">
+                          {formatCurrency(b.total)}
+                        </td>
+                        <td>
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase ${
+                              b.status === "confirmed"
+                                ? "bg-green-100 text-green-800"
+                                : b.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {b.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="flex justify-end gap-3">
+                            <button
+                              onClick={() => setEditing(b)}
+                              className="text-xs font-semibold hover:underline"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => removeBooking(b.id)}
+                              className="text-xs font-semibold text-red-600 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {filteredBookings.length > 0 && (
+          <div className="mt-8 border-t border-black/10 pt-8">
+            <h3 className="text-base font-semibold tracking-tight">Special requests</h3>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {filteredBookings.map((b) => (
                 <div
                   key={`requests-${b.id}`}
                   className="rounded-xl border border-black/10 p-4 text-sm"
                 >
                   <div className="font-medium">
-                    {b.firstName} {b.lastName} · {b.startDate} → {b.endDate}
+                    {b.firstName} {b.lastName}
                   </div>
-                  <p className="mt-1 text-foreground">
+                  <div className="text-xs text-muted">
+                    {formatDate(b.startDate)} → {formatDate(b.endDate)}
+                  </div>
+                  <p className="mt-2 text-muted">
                     {b.specialRequests?.trim() ? b.specialRequests : "No special requests."}
                   </p>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {editing && (
-          <div className="rounded-2xl border border-black/10 bg-surface p-6">
-            <h2 className="text-xl font-semibold tracking-tight">Edit booking</h2>
-            <form onSubmit={saveBooking} className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Property
-                </label>
-                <input className="input" value={editing.propertyName} disabled />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Status
-                </label>
-                <select
-                  className="input"
-                  value={editing.status}
-                  onChange={(e) => updateField("status", e.target.value)}
-                >
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Start date
-                </label>
-                <input
-                  type="date"
-                  className="input"
-                  value={editing.startDate}
-                  onChange={(e) => updateField("startDate", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  End date
-                </label>
-                <input
-                  type="date"
-                  className="input"
-                  value={editing.endDate}
-                  onChange={(e) => updateField("endDate", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  First name
-                </label>
-                <input
-                  className="input"
-                  value={editing.firstName ?? ""}
-                  onChange={(e) => updateField("firstName", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Last name
-                </label>
-                <input
-                  className="input"
-                  value={editing.lastName ?? ""}
-                  onChange={(e) => updateField("lastName", e.target.value)}
-                  required
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  className="input"
-                  value={editing.email ?? ""}
-                  onChange={(e) => updateField("email", e.target.value)}
-                  required
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  className="input"
-                  value={editing.phone ?? ""}
-                  onChange={(e) => updateField("phone", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Total guests
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  className="input"
-                  value={editing.totalGuests ?? 1}
-                  onChange={(e) => {
-                    const n = e.target.value === "" ? null : Number(e.target.value);
-                    updateField("totalGuests", n !== null && !Number.isNaN(n) ? n : null);
-                  }}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Children&apos;s ages
-                </label>
-                <input
-                  className="input"
-                  value={editing.childrenAges ?? ""}
-                  onChange={(e) => updateField("childrenAges", e.target.value)}
-                  placeholder="e.g. 4, 7"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Check-in time
-                </label>
-                <input
-                  type="time"
-                  className="input"
-                  value={editing.checkInTime ?? ""}
-                  onChange={(e) => updateField("checkInTime", e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Check-out time
-                </label>
-                <input
-                  type="time"
-                  className="input"
-                  value={editing.checkOutTime ?? ""}
-                  onChange={(e) => updateField("checkOutTime", e.target.value)}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
-                  Special requests
-                </label>
-                <textarea
-                  className="input"
-                  rows={3}
-                  value={editing.specialRequests ?? ""}
-                  onChange={(e) => updateField("specialRequests", e.target.value)}
-                />
-              </div>
-
-              <div className="sm:col-span-2 flex gap-3">
-                <button type="submit" className="btn btn-primary" disabled={saving}>
-                  {saving ? "Saving…" : "Save changes"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditing(null)}
-                  className="btn btn-secondary"
-                  disabled={saving}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+
+      {editing && (
+        <section className="card">
+          <h2 className="card-title">Edit booking</h2>
+          <p className="card-subtitle">
+            {editing.propertyName} · {formatDate(editing.startDate)} → {formatDate(editing.endDate)}
+          </p>
+          <form onSubmit={saveBooking} className="mt-8 grid gap-5 sm:grid-cols-2">
+            <div>
+              <label className="field-label">Property</label>
+              <input className="input" value={editing.propertyName} disabled />
+            </div>
+            <div>
+              <label className="field-label">Status</label>
+              <select
+                className="input"
+                value={editing.status}
+                onChange={(e) => updateField("status", e.target.value)}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">Start date</label>
+              <input
+                type="date"
+                className="input"
+                value={editing.startDate}
+                onChange={(e) => updateField("startDate", e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">End date</label>
+              <input
+                type="date"
+                className="input"
+                value={editing.endDate}
+                onChange={(e) => updateField("endDate", e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">First name</label>
+              <input
+                className="input"
+                value={editing.firstName ?? ""}
+                onChange={(e) => updateField("firstName", e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">Last name</label>
+              <input
+                className="input"
+                value={editing.lastName ?? ""}
+                onChange={(e) => updateField("lastName", e.target.value)}
+                required
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="field-label">Email</label>
+              <input
+                type="email"
+                className="input"
+                value={editing.email ?? ""}
+                onChange={(e) => updateField("email", e.target.value)}
+                required
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="field-label">Phone</label>
+              <input
+                type="tel"
+                className="input"
+                value={editing.phone ?? ""}
+                onChange={(e) => updateField("phone", e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">Total guests</label>
+              <input
+                type="number"
+                min={1}
+                className="input"
+                value={editing.totalGuests ?? 1}
+                onChange={(e) => {
+                  const n = e.target.value === "" ? null : Number(e.target.value);
+                  updateField("totalGuests", n !== null && !Number.isNaN(n) ? n : null);
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label className="field-label">Children&apos;s ages</label>
+              <input
+                className="input"
+                value={editing.childrenAges ?? ""}
+                onChange={(e) => updateField("childrenAges", e.target.value)}
+                placeholder="e.g. 4, 7"
+              />
+            </div>
+            <div>
+              <label className="field-label">Check-in time</label>
+              <input
+                type="time"
+                className="input"
+                value={editing.checkInTime ?? ""}
+                onChange={(e) => updateField("checkInTime", e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="field-label">Check-out time</label>
+              <input
+                type="time"
+                className="input"
+                value={editing.checkOutTime ?? ""}
+                onChange={(e) => updateField("checkOutTime", e.target.value)}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="field-label">Special requests</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={editing.specialRequests ?? ""}
+                onChange={(e) => updateField("specialRequests", e.target.value)}
+              />
+            </div>
+
+            <div className="mt-2 flex justify-end gap-3 border-t border-black/10 pt-5 sm:col-span-2">
+              <button
+                type="button"
+                onClick={() => setEditing(null)}
+                className="btn btn-secondary"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? "Saving…" : "Save changes"}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+    </>
   );
 }

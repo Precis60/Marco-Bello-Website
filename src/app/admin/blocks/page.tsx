@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-import { AdminTabs } from "@/components/AdminTabs";
+import { AdminLogin } from "@/components/AdminLogin";
+import { formatDate } from "@/lib/format";
 import { properties } from "@/lib/properties";
 
 interface BlockedRange {
@@ -67,7 +68,10 @@ export default function AdminBlocksPage() {
     });
 
     if (res.ok) {
-      setResult({ ok: true, message: `Dates blocked for ${properties[propertyId].name}.` });
+      setResult({
+        ok: true,
+        message: `Dates blocked for ${properties[propertyId].name}.`,
+      });
       setStart("");
       setEnd("");
       setReason("");
@@ -92,141 +96,150 @@ export default function AdminBlocksPage() {
       setResult({ ok: true, message: "Block removed." });
     } else {
       const data = await res.json();
-      setResult({ ok: false, message: data.error ?? "Failed to remove block." });
+      setResult({
+        ok: false,
+        message: data.error ?? "Failed to remove block.",
+      });
     }
   };
 
   if (!authenticated) {
     return (
-      <div className="py-16 sm:py-20">
-        <div className="mx-auto max-w-md rounded-2xl border border-black/10 bg-surface p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Admin login</h1>
-          <p className="mt-2 text-sm text-foreground">Enter the admin token to manage unavailable dates.</p>
-          <form onSubmit={login} className="mt-6 grid gap-4">
-            <input
-              type="password"
-              className="input"
-              placeholder="Admin token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              required
-            />
-            <button type="submit" className="btn btn-primary">
-              Continue
-            </button>
-          </form>
-        </div>
-      </div>
+      <AdminLogin
+        token={token}
+        onTokenChange={setToken}
+        onSubmit={login}
+        description="Enter the admin token to manage unavailable dates."
+      />
     );
   }
 
   return (
-    <div className="py-16 sm:py-20">
-      <div className="mx-auto max-w-2xl space-y-6">
-        <AdminTabs />
-        <div className="rounded-2xl border border-black/10 bg-surface p-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Block unavailable dates</h1>
-          <p className="mt-2 text-sm text-foreground">
-            Mark date ranges when a property should not be bookable. These dates are blocked
-            immediately and will also prevent guests from paying for those nights.
+    <>
+      <section className="card">
+        <h2 className="card-title">Block unavailable dates</h2>
+        <p className="card-subtitle">
+          Mark date ranges when a property should not be bookable. These dates are blocked
+          immediately and will also prevent guests from paying for those nights.
+        </p>
+
+        <form onSubmit={addBlock} className="mt-8 grid gap-5 sm:grid-cols-2">
+          <div>
+            <label className="field-label" htmlFor="block-property">
+              Property
+            </label>
+            <select
+              id="block-property"
+              className="input"
+              value={propertyId}
+              onChange={(e) => setPropertyId(e.target.value)}
+            >
+              {Object.values(properties).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="field-label" htmlFor="block-reason">
+              Reason (optional)
+            </label>
+            <input
+              id="block-reason"
+              className="input"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g. maintenance"
+            />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="block-start">
+              Start date
+            </label>
+            <input
+              id="block-start"
+              type="date"
+              className="input"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="block-end">
+              End date
+            </label>
+            <input
+              id="block-end"
+              type="date"
+              min={start || undefined}
+              className="input"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mt-2 flex justify-end border-t border-black/10 pt-5 sm:col-span-2">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? "Saving…" : "Block dates"}
+            </button>
+          </div>
+        </form>
+
+        {result && (
+          <p
+            className={`mt-6 rounded-xl border px-4 py-3 text-sm ${
+              result.ok
+                ? "border-green-600/20 bg-green-600/10 text-green-800"
+                : "border-red-600/20 bg-red-600/10 text-red-700"
+            }`}
+          >
+            {result.message}
           </p>
+        )}
+      </section>
 
-          <form onSubmit={addBlock} className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Property</label>
-              <select
-                className="input"
-                value={propertyId}
-                onChange={(e) => setPropertyId(e.target.value)}
-              >
-                {Object.values(properties).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Reason (optional)</label>
-              <input
-                className="input"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="e.g. maintenance"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Start date</label>
-              <input
-                type="date"
-                className="input"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">End date</label>
-              <input
-                type="date"
-                className="input"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
-                required
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? "Saving…" : "Block dates"}
-              </button>
-            </div>
-          </form>
+      <section className="card">
+        <h2 className="card-title">Blocked dates</h2>
+        <p className="card-subtitle">Ranges currently blocked for {properties[propertyId].name}.</p>
 
-          {result && (
-            <p className={`mt-4 text-sm ${result.ok ? "text-green-700" : "text-red-600"}`}>{result.message}</p>
-          )}
-        </div>
-
-        <div className="rounded-2xl border border-black/10 bg-surface p-6">
-          <h2 className="text-xl font-semibold tracking-tight">Existing blocked dates</h2>
-
-          {blocks === null ? (
-            <p className="mt-4 text-sm text-foreground">Loading…</p>
-          ) : blocks.length === 0 ? (
-            <p className="mt-4 text-sm text-foreground">No blocked dates for {properties[propertyId].name}.</p>
-          ) : (
-            <div className="mt-4 overflow-auto rounded-xl border border-black/10">
-              <table className="w-full text-sm">
-                <thead className="bg-black/5 text-left text-xs uppercase text-foreground">
-                  <tr>
-                    <th className="p-3">Start</th>
-                    <th className="p-3">End</th>
-                    <th className="p-3">Reason</th>
-                    <th className="p-3"></th>
+        {blocks === null ? (
+          <p className="mt-6 text-sm text-muted">Loading…</p>
+        ) : blocks.length === 0 ? (
+          <p className="mt-6 text-sm text-muted">Nothing blocked for this property.</p>
+        ) : (
+          <div className="mt-6 overflow-auto rounded-xl border border-black/10">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Reason</th>
+                  <th className="text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {blocks.map((b) => (
+                  <tr key={b.id}>
+                    <td className="whitespace-nowrap">{formatDate(b.start_date)}</td>
+                    <td className="whitespace-nowrap">{formatDate(b.end_date)}</td>
+                    <td className="text-muted">{b.reason ?? "—"}</td>
+                    <td className="text-right">
+                      <button
+                        onClick={() => removeBlock(b.id)}
+                        className="text-xs font-semibold text-red-600 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {blocks.map((b) => (
-                    <tr key={b.id} className="border-t border-black/10">
-                      <td className="p-3">{b.start_date}</td>
-                      <td className="p-3">{b.end_date}</td>
-                      <td className="p-3">{b.reason ?? "—"}</td>
-                      <td className="p-3 text-right">
-                        <button
-                          onClick={() => removeBlock(b.id)}
-                          className="text-xs text-red-600 hover:underline"
-                        >
-                          Remove
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+    </>
   );
 }
