@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 
 import { AdminLogin } from "@/components/AdminLogin";
-import { formatDate } from "@/lib/format";
+import { DateField } from "@/components/DateField";
+import { formatDate, nightsBetween } from "@/lib/format";
 import { properties } from "@/lib/properties";
 
 interface BlockedRange {
@@ -31,6 +32,8 @@ export default function AdminBlocksPage() {
 
   const [result, setResult] = useState<SetResult | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const nights = start && end ? nightsBetween(start, end) : 0;
 
   const login = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +73,7 @@ export default function AdminBlocksPage() {
     if (res.ok) {
       setResult({
         ok: true,
-        message: `Dates blocked for ${properties[propertyId].name}.`,
+        message: `${nights} night${nights === 1 ? "" : "s"} blocked for ${properties[propertyId].name} from ${formatDate(start)}.`,
       });
       setStart("");
       setEnd("");
@@ -119,8 +122,9 @@ export default function AdminBlocksPage() {
       <section className="card">
         <h2 className="card-title">Block unavailable dates</h2>
         <p className="card-subtitle">
-          Mark date ranges when a property should not be bookable. These dates are blocked
-          immediately and will also prevent guests from paying for those nights.
+          Mark nights when a property should not be bookable. Blocks apply immediately and stop
+          guests from paying for those nights. The last night blocked is the night before the date
+          the property becomes available again.
         </p>
 
         <form onSubmit={addBlock} className="mt-8 grid gap-5 sm:grid-cols-2">
@@ -153,35 +157,29 @@ export default function AdminBlocksPage() {
               placeholder="e.g. maintenance"
             />
           </div>
-          <div>
-            <label className="field-label" htmlFor="block-start">
-              Start date
-            </label>
-            <input
-              id="block-start"
-              type="date"
-              className="input"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="block-end">
-              End date
-            </label>
-            <input
-              id="block-end"
-              type="date"
-              min={start || undefined}
-              className="input"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mt-2 flex justify-end border-t border-black/10 pt-5 sm:col-span-2">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+          <DateField
+            id="block-start"
+            label="First night blocked"
+            value={start}
+            onChange={(value) => {
+              setStart(value);
+              if (end && value && end <= value) setEnd("");
+            }}
+          />
+          <DateField
+            id="block-end"
+            label="Available again from"
+            value={end}
+            min={start || undefined}
+            onChange={setEnd}
+          />
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 pt-5 sm:col-span-2">
+            <p className="text-sm text-muted">
+              {nights > 0
+                ? `${nights} night${nights === 1 ? "" : "s"} blocked, from ${formatDate(start)}.`
+                : "Pick a date range to block."}
+            </p>
+            <button type="submit" className="btn btn-primary" disabled={loading || nights === 0}>
               {loading ? "Saving…" : "Block dates"}
             </button>
           </div>
@@ -202,7 +200,7 @@ export default function AdminBlocksPage() {
 
       <section className="card">
         <h2 className="card-title">Blocked dates</h2>
-        <p className="card-subtitle">Ranges currently blocked for {properties[propertyId].name}.</p>
+        <p className="card-subtitle">Ranges blocked for {properties[propertyId].name}.</p>
 
         {blocks === null ? (
           <p className="mt-6 text-sm text-muted">Loading…</p>
@@ -213,28 +211,33 @@ export default function AdminBlocksPage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Start</th>
-                  <th>End</th>
+                  <th>First night</th>
+                  <th>Available again</th>
+                  <th className="text-right">Nights</th>
                   <th>Reason</th>
                   <th className="text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {blocks.map((b) => (
-                  <tr key={b.id}>
-                    <td className="whitespace-nowrap">{formatDate(b.start_date)}</td>
-                    <td className="whitespace-nowrap">{formatDate(b.end_date)}</td>
-                    <td className="text-muted">{b.reason ?? "—"}</td>
-                    <td className="text-right">
-                      <button
-                        onClick={() => removeBlock(b.id)}
-                        className="text-xs font-semibold text-red-600 hover:underline"
-                      >
-                        Remove
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {blocks.map((b) => {
+                  const blockNights = nightsBetween(b.start_date, b.end_date);
+                  return (
+                    <tr key={b.id}>
+                      <td className="whitespace-nowrap">{formatDate(b.start_date)}</td>
+                      <td className="whitespace-nowrap">{formatDate(b.end_date)}</td>
+                      <td className="text-right tabular-nums">{blockNights}</td>
+                      <td className="text-muted">{b.reason?.trim() ? b.reason : "—"}</td>
+                      <td className="text-right">
+                        <button
+                          onClick={() => removeBlock(b.id)}
+                          className="text-xs font-semibold whitespace-nowrap text-red-600 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

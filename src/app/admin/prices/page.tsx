@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { AdminLogin } from "@/components/AdminLogin";
+import { DateField } from "@/components/DateField";
 import { formatCurrency, formatDate, nightsBetween } from "@/lib/format";
 import { properties } from "@/lib/properties";
 
@@ -133,33 +134,22 @@ export default function AdminPricesPage() {
               required
             />
           </div>
-          <div>
-            <label className="field-label" htmlFor="price-start">
-              First night
-            </label>
-            <input
-              id="price-start"
-              type="date"
-              className="input"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="price-end">
-              Checkout date
-            </label>
-            <input
-              id="price-end"
-              type="date"
-              min={start || undefined}
-              className="input"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              required
-            />
-          </div>
+          <DateField
+            id="price-start"
+            label="First night"
+            value={start}
+            onChange={(value) => {
+              setStart(value);
+              if (end && value && end <= value) setEnd("");
+            }}
+          />
+          <DateField
+            id="price-end"
+            label="Checkout date"
+            value={end}
+            min={start || undefined}
+            onChange={setEnd}
+          />
 
           <div className="mt-2 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 pt-5 sm:col-span-2">
             <p className="text-sm text-muted">
@@ -167,7 +157,11 @@ export default function AdminPricesPage() {
                 ? `${nights} night${nights === 1 ? "" : "s"} · ${formatCurrency(Number(price) * nights)} total`
                 : "Pick a range and a rate to see the total."}
             </p>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || nights === 0 || price === ""}
+            >
               {loading ? "Saving…" : "Save rates"}
             </button>
           </div>
@@ -210,35 +204,28 @@ export default function AdminPricesPage() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="field-label" htmlFor="view-start">
-              From
-            </label>
-            <input
-              id="view-start"
-              type="date"
-              className="input"
-              value={viewStart}
-              onChange={(e) => setViewStart(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="field-label" htmlFor="view-end">
-              To
-            </label>
-            <input
-              id="view-end"
-              type="date"
-              min={viewStart || undefined}
-              className="input"
-              value={viewEnd}
-              onChange={(e) => setViewEnd(e.target.value)}
-              required
-            />
-          </div>
+          <DateField
+            id="view-start"
+            label="From"
+            value={viewStart}
+            onChange={(value) => {
+              setViewStart(value);
+              if (viewEnd && value && viewEnd <= value) setViewEnd("");
+            }}
+          />
+          <DateField
+            id="view-end"
+            label="To"
+            value={viewEnd}
+            min={viewStart || undefined}
+            onChange={setViewEnd}
+          />
           <div className="sm:col-span-2 lg:col-span-4">
-            <button type="submit" className="btn btn-secondary" disabled={viewing}>
+            <button
+              type="submit"
+              className="btn btn-secondary"
+              disabled={viewing || !viewStart || !viewEnd}
+            >
               {viewing ? "Loading…" : "View rates"}
             </button>
           </div>

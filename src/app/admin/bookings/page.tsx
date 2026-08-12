@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { DayPicker, type Matcher } from "react-day-picker";
+import { type Matcher } from "react-day-picker";
 
 import { AdminLogin } from "@/components/AdminLogin";
-import { formatCurrency, formatDate } from "@/lib/format";
+import { Calendar } from "@/components/Calendar";
+import { DateField } from "@/components/DateField";
+import { formatCurrency, formatDate, isoDate, nightsBetween } from "@/lib/format";
 import { properties } from "@/lib/properties";
 
 interface BookingWithPrice {
@@ -59,12 +61,16 @@ function endOfMonth(date: Date) {
   return d;
 }
 
+/** Parses a date or timestamp string as local midnight, so day cells never shift a day. */
+function localDate(value: string) {
+  const [year, month, day] = isoDate(value).split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 function overlapsMonth(start: string, end: string, month: Date) {
   const monthStart = startOfMonth(month).getTime();
   const monthEnd = endOfMonth(month).getTime();
-  const bookingStart = new Date(start).getTime();
-  const bookingEnd = new Date(end).getTime();
-  return bookingStart < monthEnd && bookingEnd > monthStart;
+  return localDate(start).getTime() < monthEnd && localDate(end).getTime() > monthStart;
 }
 
 export default function AdminBookingsPage() {
@@ -127,9 +133,8 @@ export default function AdminBookingsPage() {
       .filter((b) => propertyFilter === "all" || b.propertyId === propertyFilter)
       .flatMap((b) => {
         const days: Matcher[] = [];
-        const start = new Date(b.startDate);
-        const end = new Date(b.endDate);
-        const cursor = new Date(start);
+        const end = localDate(b.endDate);
+        const cursor = localDate(b.startDate);
         while (cursor < end) {
           days.push(new Date(cursor));
           cursor.setDate(cursor.getDate() + 1);
@@ -230,7 +235,7 @@ export default function AdminBookingsPage() {
           overlap the selected month.
         </p>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-2">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
           <div>
             <label className="field-label" htmlFor="booking-property">
               Property
@@ -306,16 +311,20 @@ export default function AdminBookingsPage() {
               </button>
             </div>
 
-            <div className="mt-6 rounded-xl border border-black/10 p-4">
-              <DayPicker
+            <div className="mt-6 flex justify-center rounded-xl border border-black/10 p-4">
+              <Calendar
                 month={month}
                 onMonthChange={setMonth}
                 modifiers={{ booked: bookedDays }}
-                modifiersClassNames={{ booked: "bg-brand/20 font-semibold" }}
+                modifiersClassNames={{ booked: "booked-day" }}
                 numberOfMonths={1}
                 hideNavigation
               />
             </div>
+            <p className="mt-3 flex items-center gap-2 text-xs text-muted">
+              <span className="size-3 rounded-full bg-brand/25" aria-hidden="true" />
+              Booked night
+            </p>
           </div>
 
           <div className="space-y-4">
@@ -337,6 +346,7 @@ export default function AdminBookingsPage() {
                     <tr>
                       <th>Property</th>
                       <th>Dates</th>
+                      <th className="text-right">Nights</th>
                       <th>Client</th>
                       <th>Guests</th>
                       <th className="text-right">Total</th>
@@ -351,6 +361,9 @@ export default function AdminBookingsPage() {
                         <td className="whitespace-nowrap">
                           {formatDate(b.startDate)}
                           <div className="text-xs text-muted">to {formatDate(b.endDate)}</div>
+                        </td>
+                        <td className="text-right tabular-nums">
+                          {nightsBetween(b.startDate, b.endDate)}
                         </td>
                         <td>
                           <div className="font-medium">
@@ -387,7 +400,13 @@ export default function AdminBookingsPage() {
                         <td>
                           <div className="flex justify-end gap-3">
                             <button
-                              onClick={() => setEditing(b)}
+                              onClick={() =>
+                                setEditing({
+                                  ...b,
+                                  startDate: isoDate(b.startDate),
+                                  endDate: isoDate(b.endDate),
+                                })
+                              }
                               className="text-xs font-semibold hover:underline"
                             >
                               Edit
@@ -459,26 +478,19 @@ export default function AdminBookingsPage() {
                 ))}
               </select>
             </div>
-            <div>
-              <label className="field-label">Start date</label>
-              <input
-                type="date"
-                className="input"
-                value={editing.startDate}
-                onChange={(e) => updateField("startDate", e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="field-label">End date</label>
-              <input
-                type="date"
-                className="input"
-                value={editing.endDate}
-                onChange={(e) => updateField("endDate", e.target.value)}
-                required
-              />
-            </div>
+            <DateField
+              id="edit-start"
+              label="Check-in date"
+              value={editing.startDate}
+              onChange={(value) => updateField("startDate", value)}
+            />
+            <DateField
+              id="edit-end"
+              label="Checkout date"
+              value={editing.endDate}
+              min={editing.startDate || undefined}
+              onChange={(value) => updateField("endDate", value)}
+            />
             <div>
               <label className="field-label">First name</label>
               <input
