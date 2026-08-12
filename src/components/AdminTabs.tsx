@@ -7,6 +7,9 @@ const tabs = [
   { href: "/admin/prices", label: "Prices" },
   { href: "/admin/blocks", label: "Blocks" },
   { href: "/admin/bookings", label: "Bookings" },
+  { href: "/admin/calendar", label: "Calendar" },
+  { href: "/admin/tasks", label: "Tasks" },
+  { href: "/admin/expenses", label: "Expenses" },
 ];
 
 export function AdminTabs() {
@@ -15,7 +18,7 @@ export function AdminTabs() {
   return (
     <nav
       aria-label="Admin sections"
-      className="inline-flex rounded-full border border-black/10 bg-black/[0.03] p-1"
+      className="flex flex-wrap gap-1 rounded-full border border-black/10 bg-black/[0.03] p-1"
     >
       {tabs.map((tab) => {
         const active = pathname === tab.href;

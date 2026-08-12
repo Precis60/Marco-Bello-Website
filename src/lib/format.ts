@@ -11,8 +11,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-AU", {
   year: "numeric",
 });
 
+const centsFormatter = new Intl.NumberFormat("en-AU", {
+  style: "currency",
+  currency: "AUD",
+  minimumFractionDigits: 2,
+});
+
 export function formatCurrency(amount: number) {
   return currencyFormatter.format(amount);
+}
+
+/** Formats an amount stored in cents, e.g. 125050 as "$1,250.50". */
+export function formatCents(cents: number) {
+  return centsFormatter.format(cents / 100);
 }
 
 /** Reduces a date string or ISO timestamp (as returned by the database) to `yyyy-mm-dd`. */

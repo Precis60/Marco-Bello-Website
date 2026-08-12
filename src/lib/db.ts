@@ -86,6 +86,55 @@ async function ensureSchema() {
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
       `;
+
+      // property_id is null for costs, jobs and events that cover the whole farm.
+      await sql`
+        CREATE TABLE IF NOT EXISTS expenses (
+          id SERIAL PRIMARY KEY,
+          property_id TEXT,
+          date DATE NOT NULL,
+          category TEXT NOT NULL,
+          vendor TEXT,
+          description TEXT,
+          amount_cents INTEGER NOT NULL,
+          paid BOOLEAN NOT NULL DEFAULT false,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
+
+      await sql`
+        CREATE TABLE IF NOT EXISTS tasks (
+          id SERIAL PRIMARY KEY,
+          property_id TEXT,
+          title TEXT NOT NULL,
+          details TEXT,
+          assignee TEXT,
+          due_date DATE,
+          priority TEXT NOT NULL DEFAULT 'medium',
+          status TEXT NOT NULL DEFAULT 'open',
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          completed_at TIMESTAMPTZ
+        )
+      `;
+
+      // end_date is the last day of the entry (inclusive), unlike bookings.
+      await sql`
+        CREATE TABLE IF NOT EXISTS calendar_events (
+          id SERIAL PRIMARY KEY,
+          property_id TEXT,
+          title TEXT NOT NULL,
+          kind TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'scheduled',
+          start_date DATE NOT NULL,
+          end_date DATE NOT NULL,
+          start_time TEXT,
+          end_time TEXT,
+          contractor TEXT,
+          contact TEXT,
+          notes TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
     })();
   }
   return schemaReady;
@@ -418,10 +467,7 @@ export async function getAllBookings(): Promise<BookingRow[]> {
   return rows as unknown as BookingRow[];
 }
 
-export async function updateBooking(
-  id: number,
-  fields: Partial<BookingRow>,
-): Promise<void> {
+export async function updateBooking(id: number, fields: Partial<BookingRow>): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`SELECT id, property_id FROM bookings WHERE id = ${id}`;
@@ -476,4 +522,204 @@ export async function deleteBooking(id: number): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`DELETE FROM bookings WHERE id = ${id}`;
+}
+
+export interface ExpenseRow {
+  id: number;
+  property_id: string | null;
+  date: string;
+  category: string;
+  vendor: string | null;
+  description: string | null;
+  amount_cents: number;
+  paid: boolean;
+  created_at: string;
+}
+
+export async function getExpenses(): Promise<ExpenseRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, property_id, date, category, vendor, description, amount_cents, paid, created_at
+    FROM expenses
+    ORDER BY date DESC, id DESC
+  `;
+  return rows as unknown as ExpenseRow[];
+}
+
+export async function createExpense(params: {
+  propertyId: string | null;
+  date: string;
+  category: string;
+  vendor?: string | null;
+  description?: string | null;
+  amountCents: number;
+  paid: boolean;
+}): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    INSERT INTO expenses (property_id, date, category, vendor, description, amount_cents, paid)
+    VALUES (
+      ${params.propertyId},
+      ${params.date},
+      ${params.category},
+      ${params.vendor ?? null},
+      ${params.description ?? null},
+      ${params.amountCents},
+      ${params.paid}
+    )
+  `;
+}
+
+export async function setExpensePaid(id: number, paid: boolean): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`UPDATE expenses SET paid = ${paid} WHERE id = ${id}`;
+}
+
+export async function deleteExpense(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM expenses WHERE id = ${id}`;
+}
+
+export interface TaskRow {
+  id: number;
+  property_id: string | null;
+  title: string;
+  details: string | null;
+  assignee: string | null;
+  due_date: string | null;
+  priority: string;
+  status: string;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export async function getTasks(): Promise<TaskRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, property_id, title, details, assignee, due_date, priority, status,
+           created_at, completed_at
+    FROM tasks
+    ORDER BY due_date ASC NULLS LAST, id DESC
+  `;
+  return rows as unknown as TaskRow[];
+}
+
+export async function createTask(params: {
+  propertyId: string | null;
+  title: string;
+  details?: string | null;
+  assignee?: string | null;
+  dueDate?: string | null;
+  priority: string;
+}): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    INSERT INTO tasks (property_id, title, details, assignee, due_date, priority)
+    VALUES (
+      ${params.propertyId},
+      ${params.title},
+      ${params.details ?? null},
+      ${params.assignee ?? null},
+      ${params.dueDate ?? null},
+      ${params.priority}
+    )
+  `;
+}
+
+export async function setTaskStatus(id: number, status: string): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  if (status === "done") {
+    await sql`UPDATE tasks SET status = ${status}, completed_at = now() WHERE id = ${id}`;
+  } else {
+    await sql`UPDATE tasks SET status = ${status}, completed_at = NULL WHERE id = ${id}`;
+  }
+}
+
+export async function deleteTask(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM tasks WHERE id = ${id}`;
+}
+
+export interface CalendarEventRow {
+  id: number;
+  property_id: string | null;
+  title: string;
+  kind: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  start_time: string | null;
+  end_time: string | null;
+  contractor: string | null;
+  contact: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export async function getCalendarEvents(): Promise<CalendarEventRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT id, property_id, title, kind, status, start_date, end_date, start_time, end_time,
+           contractor, contact, notes, created_at
+    FROM calendar_events
+    ORDER BY start_date ASC, id ASC
+  `;
+  return rows as unknown as CalendarEventRow[];
+}
+
+export async function createCalendarEvent(params: {
+  propertyId: string | null;
+  title: string;
+  kind: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  startTime?: string | null;
+  endTime?: string | null;
+  contractor?: string | null;
+  contact?: string | null;
+  notes?: string | null;
+}): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    INSERT INTO calendar_events (
+      property_id, title, kind, status, start_date, end_date, start_time, end_time,
+      contractor, contact, notes
+    )
+    VALUES (
+      ${params.propertyId},
+      ${params.title},
+      ${params.kind},
+      ${params.status},
+      ${params.startDate},
+      ${params.endDate},
+      ${params.startTime ?? null},
+      ${params.endTime ?? null},
+      ${params.contractor ?? null},
+      ${params.contact ?? null},
+      ${params.notes ?? null}
+    )
+  `;
+}
+
+export async function setCalendarEventStatus(id: number, status: string): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`UPDATE calendar_events SET status = ${status} WHERE id = ${id}`;
+}
+
+export async function deleteCalendarEvent(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM calendar_events WHERE id = ${id}`;
 }
