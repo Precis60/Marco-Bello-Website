@@ -136,6 +136,17 @@ async function ensureSchema() {
         )
       `;
 
+      // recipient_id is null for messages sent to the whole team channel.
+      await sql`
+        CREATE TABLE IF NOT EXISTS staff_messages (
+          id SERIAL PRIMARY KEY,
+          sender_id TEXT NOT NULL,
+          recipient_id TEXT,
+          body TEXT NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
+
       await sql`
         CREATE TABLE IF NOT EXISTS contacts (
           id SERIAL PRIMARY KEY,
@@ -812,4 +823,60 @@ export async function deleteContact(id: number): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`DELETE FROM contacts WHERE id = ${id}`;
+}
+
+export interface StaffMessageRow {
+  id: number;
+  sender_id: string;
+  recipient_id: string | null;
+  body: string;
+  created_at: string;
+}
+
+/**
+ * Messages in one conversation: the team channel when `otherId` is null,
+ * otherwise the direct thread between `viewerId` and `otherId`.
+ */
+export async function getStaffMessages(
+  viewerId: string,
+  otherId: string | null,
+): Promise<StaffMessageRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+
+  const rows = otherId
+    ? await sql`
+        SELECT id, sender_id, recipient_id, body, created_at
+        FROM staff_messages
+        WHERE (sender_id = ${viewerId} AND recipient_id = ${otherId})
+           OR (sender_id = ${otherId} AND recipient_id = ${viewerId})
+        ORDER BY id ASC
+      `
+    : await sql`
+        SELECT id, sender_id, recipient_id, body, created_at
+        FROM staff_messages
+        WHERE recipient_id IS NULL
+        ORDER BY id ASC
+      `;
+
+  return rows as unknown as StaffMessageRow[];
+}
+
+export async function createStaffMessage(params: {
+  senderId: string;
+  recipientId: string | null;
+  body: string;
+}): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    INSERT INTO staff_messages (sender_id, recipient_id, body)
+    VALUES (${params.senderId}, ${params.recipientId}, ${params.body})
+  `;
+}
+
+export async function deleteStaffMessage(id: number, senderId: string): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM staff_messages WHERE id = ${id} AND sender_id = ${senderId}`;
 }

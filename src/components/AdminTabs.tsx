@@ -11,6 +11,7 @@ const tabs = [
   { href: "/admin/tasks", label: "Tasks" },
   { href: "/admin/expenses", label: "Expenses" },
   { href: "/admin/contacts", label: "Contacts" },
+  { href: "/admin/messenger", label: "Messenger" },
 ];
 
 export function AdminTabs() {
