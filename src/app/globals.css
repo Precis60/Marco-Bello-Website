@@ -143,6 +143,32 @@ body {
   opacity: 1;
 }
 
+/* Operations calendar day types. Later rules win where entries overlap. */
+.calendar .day-stay .rdp-day_button {
+  background-color: rgb(0 0 0 / 0.08);
+  font-weight: 600;
+}
+
+.calendar .day-event .rdp-day_button {
+  background-color: color-mix(in srgb, var(--brand) 22%, transparent);
+  font-weight: 600;
+}
+
+.calendar .day-scheduled .rdp-day_button {
+  background-color: #fde68a;
+  font-weight: 600;
+}
+
+.calendar .day-confirmed .rdp-day_button {
+  background-color: #bbf7d0;
+  font-weight: 600;
+}
+
+.calendar .day-contractor .rdp-day_button {
+  background-color: #bae6fd;
+  font-weight: 600;
+}
+
 @layer base {
   ::selection {
     background: color-mix(in srgb, var(--brand) 20%, transparent);
