@@ -17,9 +17,10 @@ Deploy this project on **Vercel** instead:
 
 ## Booking system setup
 
-The booking calendars on `/rentals` (Main House and Vineyard Tiny Home) are
-fully functional: each shows live availability and lets guests pay online via
-Stripe Checkout. Two things need to be provisioned before it works:
+The booking calendars on `/rentals` (The Main House - Villa Di Marco and Tiny
+Home - La Stalla) are fully functional: each shows live availability and lets
+guests pay online via Stripe Checkout. Two things need to be provisioned
+before it works:
 
 ### 1. Database (Postgres — Supabase or Neon)
 

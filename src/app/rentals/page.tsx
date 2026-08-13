@@ -14,10 +14,10 @@ export default function RentalsPage() {
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
             Nestled in the scenic countryside of Drysdale, Bello Marco Farm offers two unique stays surrounded by 
-            vineyards and farm charm. The Main House provides a spacious, comfortable retreat perfect for families and 
-            groups, while the Vineyard & Hobby Farm Tiny Home offers a cozy, peaceful escape overlooking rolling vines 
-            and gardens. Guests can explore the property, enjoy local produce, and experience the quiet beauty of rural 
-            life, all just moments from the Bellarine Peninsula’s attractions.{" "}
+            vineyards and farm charm. The Main House - Villa Di Marco provides a spacious, comfortable retreat perfect 
+            for families and groups, while Tiny Home - La Stalla offers a cozy, peaceful escape overlooking rolling 
+            vines and gardens. Guests can explore the property, enjoy local produce, and experience the quiet beauty of 
+            rural life, all just moments from the Bellarine Peninsula’s attractions.{" "}
             <Link href="/contact" className="underline underline-offset-2 hover:text-foreground">
               get in touch
             </Link>{" "}
@@ -28,23 +28,10 @@ export default function RentalsPage() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              name: "The Main House",
-              blurb: "A considered, high-comfort stay with sweeping views.",
-            },
-            {
-              name: "Vineyard - Tiny Home",
-              blurb: "Quiet, warm interiors with an orchard outlook.",
-            },
-            {
-              name: "Hobby Farm - Tiny Home",
-              blurb: "Minimal luxury — perfect for weekends and events.",
-            },
-          ].map((item) => (
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
+          {Object.values(properties).map((item) => (
             <div
-              key={item.name}
+              key={item.id}
               className="rounded-2xl border border-black/10 bg-surface p-6"
             >
               <div className="text-sm font-semibold tracking-[0.12em] uppercase">
@@ -62,8 +49,8 @@ export default function RentalsPage() {
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
             Select your dates below to see live availability and pay securely
-            online. The Main House and the Vineyard Tiny Home each have their
-            own calendar and are booked separately.
+            online. The Main House - Villa Di Marco and Tiny Home - La Stalla
+            each have their own calendar and are booked separately.
           </p>
 
           <div className="mt-8 grid gap-6 md:grid-cols-2">
