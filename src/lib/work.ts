@@ -1,8 +1,8 @@
 /** Shared vocabulary for logging and assigning work around the farm. */
 
 export const AREAS = [
-  "Main house",
-  "Vineyard tiny home",
+  "Main house - Villa Di Marco",
+  "Tiny home - La Stalla",
   "Vineyard",
   "Orchard",
   "Gardens & lawns",
