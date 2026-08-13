@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { AdminLogin } from "@/components/AdminLogin";
+import { AdminLogin, REJECTED_TOKEN } from "@/components/AdminLogin";
 import { Calendar } from "@/components/Calendar";
 import { DateField } from "@/components/DateField";
 import { formatDate, isoDate } from "@/lib/format";
@@ -172,7 +172,12 @@ export default function AdminCalendarPage() {
     });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Couldn’t load the calendar.");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        setError(REJECTED_TOKEN);
+      } else {
+        setError(data.error ?? "Couldn’t load the calendar.");
+      }
       setEvents(null);
       return;
     }

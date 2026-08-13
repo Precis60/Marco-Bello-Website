@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { AdminLogin } from "@/components/AdminLogin";
+import { AdminLogin, REJECTED_TOKEN } from "@/components/AdminLogin";
 import { staff, staffInitials } from "@/lib/staff";
 
 interface Message {
@@ -58,7 +58,12 @@ export default function AdminMessengerPage() {
     const res = await fetch(`/api/messages?${params}`, { headers: { "x-admin-token": token } });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Couldn’t load messages.");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        setError(REJECTED_TOKEN);
+      } else {
+        setError(data.error ?? "Couldn’t load messages.");
+      }
       setMessages(null);
       return;
     }

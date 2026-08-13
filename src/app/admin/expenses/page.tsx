@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { AdminLogin } from "@/components/AdminLogin";
+import { AdminLogin, REJECTED_TOKEN } from "@/components/AdminLogin";
 import { DateField } from "@/components/DateField";
 import { MonthPicker } from "@/components/MonthPicker";
 import { formatCents, formatDate, isoDate } from "@/lib/format";
@@ -57,7 +57,12 @@ export default function AdminExpensesPage() {
     const res = await fetch("/api/expenses", { headers: { "x-admin-token": token } });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Couldn’t load expenses.");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        setError(REJECTED_TOKEN);
+      } else {
+        setError(data.error ?? "Couldn’t load expenses.");
+      }
       setExpenses(null);
       return;
     }

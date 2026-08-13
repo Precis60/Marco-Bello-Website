@@ -1,5 +1,8 @@
 "use client";
 
+/** Shown on the sign-in screen after the server rejects the token. */
+export const REJECTED_TOKEN = "That token wasn’t accepted. Check it and try again.";
+
 export function AdminLogin({
   token,
   onTokenChange,
@@ -28,7 +31,7 @@ export function AdminLogin({
             className="input"
             placeholder="••••••••••••"
             value={token}
-            onChange={(e) => onTokenChange(e.target.value)}
+            onChange={(e) => onTokenChange(e.target.value.trim())}
             required
           />
           <button type="submit" className="btn btn-primary mt-6 w-full">
