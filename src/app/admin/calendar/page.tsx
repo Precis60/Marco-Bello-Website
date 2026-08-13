@@ -394,9 +394,8 @@ export default function AdminCalendarPage() {
     setPropertyId("");
   };
 
-  /** Loads an existing entry into the form below so it can be changed. */
-  const startEditing = (event: CalendarEvent) => {
-    setEditingId(event.id);
+  /** Copies an entry into the form below and scrolls to it. */
+  const fillForm = (event: CalendarEvent) => {
     setTitle(event.title);
     setKind(event.kind);
     setStatus(event.status);
@@ -412,6 +411,19 @@ export default function AdminCalendarPage() {
     document
       .getElementById("event-form")
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  /** Loads an existing entry into the form below so it can be changed. */
+  const startEditing = (event: CalendarEvent) => {
+    setEditingId(event.id);
+    fillForm(event);
+  };
+
+  /** Prefills the form from an entry as a new, unsaved copy. */
+  const duplicateEvent = (event: CalendarEvent) => {
+    setEditingId(null);
+    fillForm(event);
+    setTitle(`${event.title} (copy)`);
   };
 
   const saveEvent = async (e: React.FormEvent) => {
@@ -811,6 +823,12 @@ export default function AdminCalendarPage() {
                         className="text-brand hover:underline"
                       >
                         Edit
+                      </button>
+                      <button
+                        onClick={() => duplicateEvent(e)}
+                        className="text-brand hover:underline"
+                      >
+                        Duplicate
                       </button>
                       <button
                         onClick={() => removeEvent(e.id)}

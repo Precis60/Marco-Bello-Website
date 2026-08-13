@@ -83,6 +83,7 @@ export default function AdminBookingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<BookingWithPrice | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
   const years = useMemo(() => {
@@ -123,6 +124,11 @@ export default function AdminBookingsPage() {
     loadBookings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
+
+  const selected = useMemo(
+    () => bookings?.find((b) => b.id === selectedId) ?? null,
+    [bookings, selectedId],
+  );
 
   const filteredBookings = useMemo(() => {
     if (!bookings) return [];
@@ -173,9 +179,8 @@ export default function AdminBookingsPage() {
 
     const res = await fetch("/api/bookings", {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-admin-token": token },
       body: JSON.stringify({
-        token,
         id: editing.id,
         startDate: editing.startDate,
         endDate: editing.endDate,
@@ -207,16 +212,44 @@ export default function AdminBookingsPage() {
     setError(null);
     const res = await fetch("/api/bookings", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, id }),
+      headers: { "Content-Type": "application/json", "x-admin-token": token },
+      body: JSON.stringify({ id }),
+    });
+
+    if (res.ok) {
+      if (selectedId === id) setSelectedId(null);
+      if (editing?.id === id) setEditing(null);
+      await loadBookings();
+    } else {
+      const data = await res.json();
+      setError(data.error ?? "Couldn’t delete booking.");
+    }
+  };
+
+  const setStatus = async (booking: BookingWithPrice, status: string) => {
+    setSaving(true);
+    setError(null);
+    const res = await fetch("/api/bookings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-admin-token": token },
+      body: JSON.stringify({ id: booking.id, status }),
     });
 
     if (res.ok) {
       await loadBookings();
     } else {
       const data = await res.json();
-      setError(data.error ?? "Couldn’t delete booking.");
+      setError(data.error ?? "Couldn’t update booking.");
     }
+    setSaving(false);
+  };
+
+  const startEditing = (booking: BookingWithPrice) => {
+    setEditing({
+      ...booking,
+      startDate: isoDate(booking.startDate),
+      endDate: isoDate(booking.endDate),
+    });
   };
 
   if (!authenticated) {
@@ -361,7 +394,11 @@ export default function AdminBookingsPage() {
                   </thead>
                   <tbody>
                     {filteredBookings.map((b) => (
-                      <tr key={b.id}>
+                      <tr
+                        key={b.id}
+                        onClick={() => setSelectedId(b.id)}
+                        className={`cursor-pointer ${b.id === selectedId ? "bg-brand/10" : "hover:bg-black/[0.03]"}`}
+                      >
                         <td>{b.propertyName}</td>
                         <td className="whitespace-nowrap">
                           {formatDate(b.startDate)}
@@ -402,16 +439,25 @@ export default function AdminBookingsPage() {
                             {b.status}
                           </span>
                         </td>
-                        <td>
+                        <td onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end gap-3">
                             <button
-                              onClick={() =>
-                                setEditing({
-                                  ...b,
-                                  startDate: isoDate(b.startDate),
-                                  endDate: isoDate(b.endDate),
-                                })
-                              }
+                              onClick={() => setSelectedId(b.id)}
+                              className="text-xs font-semibold hover:underline"
+                            >
+                              View
+                            </button>
+                            {b.status !== "confirmed" && (
+                              <button
+                                onClick={() => setStatus(b, "confirmed")}
+                                disabled={saving}
+                                className="text-xs font-semibold text-green-700 hover:underline disabled:opacity-50"
+                              >
+                                Confirm
+                              </button>
+                            )}
+                            <button
+                              onClick={() => startEditing(b)}
                               className="text-xs font-semibold hover:underline"
                             >
                               Edit
@@ -457,6 +503,80 @@ export default function AdminBookingsPage() {
           </div>
         )}
       </section>
+
+      {selected && (
+        <section className="card">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 className="card-title">
+                {selected.firstName} {selected.lastName}
+              </h2>
+              <p className="card-subtitle">
+                {selected.propertyName} · {formatDate(selected.startDate)} →{" "}
+                {formatDate(selected.endDate)} · {nightsBetween(selected.startDate, selected.endDate)}{" "}
+                nights · {selected.status}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {selected.status !== "confirmed" && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setStatus(selected, "confirmed")}
+                  disabled={saving}
+                >
+                  Confirm booking
+                </button>
+              )}
+              {selected.status !== "cancelled" && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setStatus(selected, "cancelled")}
+                  disabled={saving}
+                >
+                  Cancel booking
+                </button>
+              )}
+              <button className="btn btn-secondary" onClick={() => startEditing(selected)}>
+                Edit
+              </button>
+              <button
+                className="btn btn-secondary text-red-600"
+                onClick={() => removeBooking(selected.id)}
+              >
+                Delete
+              </button>
+              <button className="btn btn-secondary" onClick={() => setSelectedId(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+
+          <dl className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["Email", selected.email ?? "—"],
+              ["Phone", selected.phone ?? "—"],
+              ["Guests", String(selected.totalGuests ?? 1)],
+              ["Children's ages", selected.childrenAges?.trim() || "—"],
+              ["Check-in time", selected.checkInTime || "—"],
+              ["Check-out time", selected.checkOutTime || "—"],
+              ["Nightly rate", formatCurrency(selected.dailyRate)],
+              ["Total", formatCurrency(selected.total)],
+              ["Booked on", formatDate(selected.createdAt)],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <dt className="field-label">{label}</dt>
+                <dd className="text-sm">{value}</dd>
+              </div>
+            ))}
+            <div className="sm:col-span-2 lg:col-span-3">
+              <dt className="field-label">Special requests</dt>
+              <dd className="text-sm text-muted">
+                {selected.specialRequests?.trim() || "No special requests."}
+              </dd>
+            </div>
+          </dl>
+        </section>
+      )}
 
       {editing && (
         <section className="card">
