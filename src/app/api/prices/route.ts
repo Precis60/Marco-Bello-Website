@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getAdminToken } from "@/lib/adminAuth";
 import { deletePricesForRange, getPricesForRange, setPricesForRange } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
-
-function getAdminToken(): string | undefined {
-  return process.env.ADMIN_TOKEN;
-}
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -52,7 +49,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.token !== adminToken) {
+  if (body.token?.trim() !== adminToken) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
@@ -95,7 +92,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.token !== adminToken) {
+  if (body.token?.trim() !== adminToken) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

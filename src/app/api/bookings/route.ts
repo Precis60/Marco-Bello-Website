@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getAdminToken } from "@/lib/adminAuth";
 import { calculateTotal, deleteBooking, getAllBookings, updateBooking } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
-
-function getAdminToken(): string | undefined {
-  return process.env.ADMIN_TOKEN;
-}
 
 function requireAuth(request: NextRequest):
   | { ok: true; token: string }
@@ -16,7 +13,7 @@ function requireAuth(request: NextRequest):
   }
 
   const token = request.headers.get("x-admin-token");
-  if (token !== adminToken) {
+  if (token?.trim() !== adminToken) {
     return { ok: false, response: NextResponse.json({ error: "Unauthorized." }, { status: 401 }) };
   }
 
