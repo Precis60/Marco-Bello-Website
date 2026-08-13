@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { AdminLogin } from "@/components/AdminLogin";
+import { AdminLogin, REJECTED_TOKEN } from "@/components/AdminLogin";
 import { DateField } from "@/components/DateField";
 import { formatDate, isoDate } from "@/lib/format";
 import { properties } from "@/lib/properties";
@@ -168,7 +168,12 @@ export default function AdminTasksPage() {
     const res = await fetch("/api/tasks", { headers: { "x-admin-token": token } });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Couldn’t load tasks.");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        setError(REJECTED_TOKEN);
+      } else {
+        setError(data.error ?? "Couldn’t load tasks.");
+      }
       setTasks(null);
       return;
     }

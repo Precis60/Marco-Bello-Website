@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { AdminLogin } from "@/components/AdminLogin";
+import { AdminLogin, REJECTED_TOKEN } from "@/components/AdminLogin";
 
 interface Contact {
   id: number;
@@ -68,7 +68,12 @@ export default function AdminContactsPage() {
     const res = await fetch("/api/contacts", { headers: { "x-admin-token": token } });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Couldn’t load contacts.");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        setError(REJECTED_TOKEN);
+      } else {
+        setError(data.error ?? "Couldn’t load contacts.");
+      }
       setContacts(null);
       return;
     }

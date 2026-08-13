@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { type Matcher } from "react-day-picker";
 
-import { AdminLogin } from "@/components/AdminLogin";
+import { AdminLogin, REJECTED_TOKEN } from "@/components/AdminLogin";
 import { Calendar } from "@/components/Calendar";
 import { DateField } from "@/components/DateField";
 import { formatCurrency, formatDate, isoDate, nightsBetween } from "@/lib/format";
@@ -102,7 +102,12 @@ export default function AdminBookingsPage() {
     });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Failed to load bookings.");
+      if (res.status === 401) {
+        setAuthenticated(false);
+        setError(REJECTED_TOKEN);
+      } else {
+        setError(data.error ?? "Failed to load bookings.");
+      }
       setBookings(null);
     } else {
       const data = await res.json();
