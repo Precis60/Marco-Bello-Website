@@ -48,7 +48,12 @@ interface Stay {
 }
 
 const KINDS = [
-  { value: "event", label: "Event", className: "day-event", swatch: "bg-brand/25" },
+  {
+    value: "event",
+    label: "Event",
+    className: "day-event",
+    swatch: "bg-brand/25",
+  },
   {
     value: "scheduled-work",
     label: "Scheduled work",
@@ -93,7 +98,11 @@ function toIso(date: Date) {
 function daysInRange(startIso: string, endIso: string) {
   const days: Date[] = [];
   const end = localDate(endIso);
-  for (let day = localDate(startIso); day <= end; day.setDate(day.getDate() + 1)) {
+  for (
+    let day = localDate(startIso);
+    day <= end;
+    day.setDate(day.getDate() + 1)
+  ) {
     days.push(new Date(day));
   }
   return days;
@@ -101,6 +110,27 @@ function daysInRange(startIso: string, endIso: string) {
 
 function kindLabel(kind: string) {
   return KINDS.find((k) => k.value === kind)?.label ?? kind;
+}
+
+const VIEWS = [
+  { value: "day", label: "Day" },
+  { value: "week", label: "Week" },
+  { value: "month", label: "Month" },
+];
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+/** Monday of the week containing `date`, matching the calendar's week start. */
+function startOfWeek(date: Date) {
+  return addDays(date, -((date.getDay() + 6) % 7));
+}
+
+function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 export default function AdminCalendarPage() {
@@ -111,7 +141,9 @@ export default function AdminCalendarPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stays, setStays] = useState<Stay[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [month, setMonth] = useState<Date>(new Date());
+  const [month, setMonth] = useState<Date>(startOfMonth(new Date()));
+  const [view, setView] = useState("month");
+  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [kindFilter, setKindFilter] = useState("all");
   const [propertyFilter, setPropertyFilter] = useState("all");
 
@@ -127,6 +159,7 @@ export default function AdminCalendarPage() {
   const [notes, setNotes] = useState("");
   const [propertyId, setPropertyId] = useState("");
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const login = (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +167,9 @@ export default function AdminCalendarPage() {
   };
 
   const loadEvents = async () => {
-    const res = await fetch("/api/events", { headers: { "x-admin-token": token } });
+    const res = await fetch("/api/events", {
+      headers: { "x-admin-token": token },
+    });
     if (!res.ok) {
       const data = await res.json();
       setError(data.error ?? "Couldn’t load the calendar.");
@@ -147,17 +182,23 @@ export default function AdminCalendarPage() {
   };
 
   const loadTasks = async () => {
-    const res = await fetch("/api/tasks", { headers: { "x-admin-token": token } });
+    const res = await fetch("/api/tasks", {
+      headers: { "x-admin-token": token },
+    });
     if (!res.ok) return;
     const data = await res.json();
     setTasks((data.tasks ?? []).filter((task: Task) => task.due_date));
   };
 
   const loadStays = async () => {
-    const res = await fetch("/api/bookings", { headers: { "x-admin-token": token } });
+    const res = await fetch("/api/bookings", {
+      headers: { "x-admin-token": token },
+    });
     if (!res.ok) return;
     const data = await res.json();
-    setStays((data.bookings ?? []).filter((b: Stay) => b.status !== "cancelled"));
+    setStays(
+      (data.bookings ?? []).filter((b: Stay) => b.status !== "cancelled"),
+    );
   };
 
   useEffect(() => {
@@ -174,33 +215,132 @@ export default function AdminCalendarPage() {
       (e) =>
         (kindFilter === "all" || e.kind === kindFilter) &&
         (propertyFilter === "all" ||
-          (propertyFilter === "farm" ? e.property_id === null : e.property_id === propertyFilter)),
+          (propertyFilter === "farm"
+            ? e.property_id === null
+            : e.property_id === propertyFilter)),
     );
   }, [events, kindFilter, propertyFilter]);
 
-  /** Tasks assigned inside the visible month, honouring the property filter. */
-  const monthTasks = useMemo(() => {
-    const prefix = `${month.getFullYear()}-${`${month.getMonth() + 1}`.padStart(2, "0")}`;
-    return tasks
-      .filter(
+  const visibleTasks = useMemo(
+    () =>
+      tasks.filter(
         (task) =>
-          isoDate(task.due_date ?? "").startsWith(prefix) &&
-          (propertyFilter === "all" ||
-            (propertyFilter === "farm"
-              ? task.property_id === null
-              : task.property_id === propertyFilter)),
-      )
-      .sort((a, b) => isoDate(a.due_date ?? "").localeCompare(isoDate(b.due_date ?? "")));
-  }, [tasks, month, propertyFilter]);
+          propertyFilter === "all" ||
+          (propertyFilter === "farm"
+            ? task.property_id === null
+            : task.property_id === propertyFilter),
+      ),
+    [tasks, propertyFilter],
+  );
 
-  const monthEntries = useMemo(() => {
-    const prefix = `${month.getFullYear()}-${`${month.getMonth() + 1}`.padStart(2, "0")}`;
+  /** First and last day covered by the Day, Week or Month view. */
+  const range = useMemo(() => {
+    if (view === "day") return { start: selectedDay, end: selectedDay };
+    if (view === "week") {
+      const start = startOfWeek(selectedDay);
+      return { start, end: addDays(start, 6) };
+    }
+    return {
+      start: startOfMonth(month),
+      end: new Date(month.getFullYear(), month.getMonth() + 1, 0),
+    };
+  }, [view, selectedDay, month]);
+
+  const rangeDays = useMemo(() => {
+    const days: Date[] = [];
+    for (let day = range.start; day <= range.end; day = addDays(day, 1))
+      days.push(day);
+    return days;
+  }, [range]);
+
+  const rangeTasks = useMemo(() => {
+    const start = toIso(range.start);
+    const end = toIso(range.end);
+    return visibleTasks
+      .filter((task) => {
+        const due = isoDate(task.due_date ?? "");
+        return due >= start && due <= end;
+      })
+      .sort((a, b) =>
+        isoDate(a.due_date ?? "").localeCompare(isoDate(b.due_date ?? "")),
+      );
+  }, [visibleTasks, range]);
+
+  const rangeEntries = useMemo(() => {
+    const start = toIso(range.start);
+    const end = toIso(range.end);
     return visible
       .filter(
-        (e) => isoDate(e.start_date) <= `${prefix}-31` && isoDate(e.end_date) >= `${prefix}-01`,
+        (e) => isoDate(e.start_date) <= end && isoDate(e.end_date) >= start,
       )
-      .sort((a, b) => isoDate(a.start_date).localeCompare(isoDate(b.start_date)));
-  }, [visible, month]);
+      .sort((a, b) =>
+        isoDate(a.start_date).localeCompare(isoDate(b.start_date)),
+      );
+  }, [visible, range]);
+
+  /** Everything landing on a single day, for the Day and Week views. */
+  const itemsOn = (date: Date) => {
+    const iso = toIso(date);
+    return {
+      events: visible.filter(
+        (e) =>
+          isoDate(e.start_date) <= iso &&
+          isoDate(e.end_date) >= iso &&
+          e.status !== "cancelled",
+      ),
+      tasks: visibleTasks.filter(
+        (task) => isoDate(task.due_date ?? "") === iso,
+      ),
+      stays: stays.filter(
+        (stay) =>
+          isoDate(stay.startDate) <= iso &&
+          toIso(addDays(localDate(stay.endDate), -1)) >= iso,
+      ),
+    };
+  };
+
+  const shift = (direction: number) => {
+    if (view === "month") {
+      const next = new Date(
+        month.getFullYear(),
+        month.getMonth() + direction,
+        1,
+      );
+      setMonth(next);
+      setSelectedDay(next);
+      return;
+    }
+    const next = addDays(selectedDay, direction * (view === "week" ? 7 : 1));
+    setSelectedDay(next);
+    setMonth(startOfMonth(next));
+  };
+
+  const goToday = () => {
+    const today = new Date();
+    setSelectedDay(today);
+    setMonth(startOfMonth(today));
+  };
+
+  const dayStays = useMemo(() => {
+    const iso = toIso(selectedDay);
+    return stays.filter(
+      (stay) =>
+        isoDate(stay.startDate) <= iso &&
+        toIso(addDays(localDate(stay.endDate), -1)) >= iso,
+    );
+  }, [stays, selectedDay]);
+
+  const rangeTitle =
+    view === "day"
+      ? selectedDay.toLocaleDateString("en-AU", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : view === "week"
+        ? `${range.start.toLocaleDateString("en-AU", { day: "numeric", month: "short" })} – ${range.end.toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}`
+        : month.toLocaleDateString("en-AU", { month: "long", year: "numeric" });
 
   const modifiers = useMemo(() => {
     const byKind: Record<string, Date[]> = {
@@ -219,7 +359,8 @@ export default function AdminCalendarPage() {
 
     for (const e of visible) {
       if (e.status === "cancelled") continue;
-      const className = KINDS.find((k) => k.value === e.kind)?.className ?? "day-event";
+      const className =
+        KINDS.find((k) => k.value === e.kind)?.className ?? "day-event";
       byKind[className].push(...daysInRange(e.start_date, e.end_date));
     }
 
@@ -233,16 +374,52 @@ export default function AdminCalendarPage() {
     return byKind;
   }, [visible, tasks, stays]);
 
-  const addEvent = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setEditingId(null);
+    setTitle("");
+    setKind(KINDS[0].value);
+    setStatus("scheduled");
+    setStartDate("");
+    setEndDate("");
+    setStartTime("");
+    setEndTime("");
+    setContractor("");
+    setContact("");
+    setNotes("");
+    setPropertyId("");
+  };
+
+  /** Loads an existing entry into the form below so it can be changed. */
+  const startEditing = (event: CalendarEvent) => {
+    setEditingId(event.id);
+    setTitle(event.title);
+    setKind(event.kind);
+    setStatus(event.status);
+    setStartDate(isoDate(event.start_date));
+    setEndDate(isoDate(event.end_date));
+    setStartTime(event.start_time ?? "");
+    setEndTime(event.end_time ?? "");
+    setContractor(event.contractor ?? "");
+    setContact(event.contact ?? "");
+    setNotes(event.notes ?? "");
+    setPropertyId(event.property_id ?? "");
+    setError(null);
+    document
+      .getElementById("event-form")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const saveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
     const res = await fetch("/api/events", {
-      method: "POST",
+      method: editingId === null ? "POST" : "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         token,
+        ...(editingId === null ? {} : { id: editingId }),
         propertyId: propertyId || null,
         title,
         kind,
@@ -258,12 +435,16 @@ export default function AdminCalendarPage() {
     });
 
     if (res.ok) {
-      setTitle("");
-      setStartTime("");
-      setEndTime("");
-      setContractor("");
-      setContact("");
-      setNotes("");
+      if (editingId === null) {
+        setTitle("");
+        setStartTime("");
+        setEndTime("");
+        setContractor("");
+        setContact("");
+        setNotes("");
+      } else {
+        resetForm();
+      }
       await loadEvents();
     } else {
       const data = await res.json();
@@ -290,8 +471,10 @@ export default function AdminCalendarPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, id }),
     });
-    if (res.ok) await loadEvents();
-    else setError("Couldn’t delete that entry.");
+    if (res.ok) {
+      if (editingId === id) resetForm();
+      await loadEvents();
+    } else setError("Couldn’t delete that entry.");
   };
 
   if (!authenticated) {
@@ -313,7 +496,8 @@ export default function AdminCalendarPage() {
           <div>
             <h2 className="card-title">Operations calendar</h2>
             <p className="card-subtitle">
-              Events, scheduled and confirmed works, and contractor bookings, alongside guest stays.
+              Events, scheduled and confirmed works, and contractor bookings,
+              alongside guest stays.
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-4">
@@ -360,6 +544,13 @@ export default function AdminCalendarPage() {
         <div className="mt-8 grid gap-8 lg:grid-cols-[auto_1fr]">
           <div className="rounded-2xl border border-black/10 p-4">
             <Calendar
+              mode="single"
+              selected={selectedDay}
+              onSelect={(day) => {
+                if (!day) return;
+                setSelectedDay(day);
+                setMonth(startOfMonth(day));
+              }}
               month={month}
               onMonthChange={setMonth}
               modifiers={modifiers}
@@ -376,39 +567,192 @@ export default function AdminCalendarPage() {
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-black/10 pt-4 text-xs text-muted">
               {KINDS.map((k) => (
                 <span key={k.value} className="flex items-center gap-2">
-                  <span className={`size-3 rounded-full ${k.swatch}`} aria-hidden="true" />
+                  <span
+                    className={`size-3 rounded-full ${k.swatch}`}
+                    aria-hidden="true"
+                  />
                   {k.label}
                 </span>
               ))}
               <span className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-violet-200" aria-hidden="true" />
+                <span
+                  className="size-3 rounded-full bg-violet-200"
+                  aria-hidden="true"
+                />
                 Task
               </span>
               <span className="flex items-center gap-2">
-                <span className="size-3 rounded-full bg-black/15" aria-hidden="true" />
+                <span
+                  className="size-3 rounded-full bg-black/15"
+                  aria-hidden="true"
+                />
                 Guest stay
               </span>
             </div>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold">
-              {month.toLocaleDateString("en-AU", { month: "long", year: "numeric" })}
-            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div
+                className="inline-flex rounded-xl border border-black/10 bg-black/[0.03] p-1"
+                role="tablist"
+                aria-label="Calendar view"
+              >
+                {VIEWS.map((v) => (
+                  <button
+                    key={v.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === v.value}
+                    onClick={() => setView(v.value)}
+                    className={`rounded-lg px-4 py-1.5 text-xs font-semibold transition ${
+                      view === v.value
+                        ? "bg-white text-foreground shadow-sm"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => shift(-1)}
+                  className="rounded-lg border border-black/10 px-2.5 py-1.5"
+                  aria-label={`Previous ${view}`}
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={goToday}
+                  className="rounded-lg border border-black/10 px-3 py-1.5"
+                >
+                  Today
+                </button>
+                <button
+                  type="button"
+                  onClick={() => shift(1)}
+                  className="rounded-lg border border-black/10 px-2.5 py-1.5"
+                  aria-label={`Next ${view}`}
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+
+            <h3 className="mt-5 text-sm font-semibold">{rangeTitle}</h3>
+
             {events === null ? (
               <p className="mt-4 text-sm text-muted">Loading…</p>
-            ) : monthEntries.length === 0 && monthTasks.length === 0 ? (
-              <p className="mt-4 text-sm text-muted">Nothing scheduled this month.</p>
+            ) : view === "week" ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {rangeDays.map((day) => {
+                  const items = itemsOn(day);
+                  const empty =
+                    items.events.length === 0 &&
+                    items.tasks.length === 0 &&
+                    items.stays.length === 0;
+                  return (
+                    <div
+                      key={toIso(day)}
+                      className={`rounded-xl border p-4 ${
+                        toIso(day) === toIso(new Date())
+                          ? "border-brand/40 bg-brand/[0.04]"
+                          : "border-black/10"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDay(day);
+                          setView("day");
+                        }}
+                        className="text-sm font-semibold hover:underline"
+                      >
+                        {day.toLocaleDateString("en-AU", {
+                          weekday: "short",
+                          day: "numeric",
+                        })}
+                      </button>
+                      {empty ? (
+                        <p className="mt-2 text-xs text-muted">
+                          Nothing scheduled.
+                        </p>
+                      ) : (
+                        <ul className="mt-2 space-y-1.5 text-xs">
+                          {items.events.map((e) => (
+                            <li
+                              key={`e${e.id}`}
+                              className="flex items-start gap-2"
+                            >
+                              <span
+                                className={`mt-1 size-2 shrink-0 rounded-full ${
+                                  KINDS.find((k) => k.value === e.kind)
+                                    ?.swatch ?? "bg-brand/25"
+                                }`}
+                                aria-hidden="true"
+                              />
+                              <span>
+                                {e.start_time && `${e.start_time} `}
+                                {e.title}
+                              </span>
+                            </li>
+                          ))}
+                          {items.tasks.map((task) => (
+                            <li
+                              key={`t${task.id}`}
+                              className="flex items-start gap-2"
+                            >
+                              <span
+                                className="mt-1 size-2 shrink-0 rounded-full bg-violet-200"
+                                aria-hidden="true"
+                              />
+                              <span>{task.title}</span>
+                            </li>
+                          ))}
+                          {items.stays.map((stay) => (
+                            <li
+                              key={`s${stay.id}`}
+                              className="flex items-start gap-2"
+                            >
+                              <span
+                                className="mt-1 size-2 shrink-0 rounded-full bg-black/15"
+                                aria-hidden="true"
+                              />
+                              <span>
+                                {stay.firstName} {stay.lastName} ·{" "}
+                                {stay.propertyName}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : rangeEntries.length === 0 && rangeTasks.length === 0 ? (
+              <p className="mt-4 text-sm text-muted">
+                Nothing scheduled{" "}
+                {view === "day" ? "on this day" : "this month"}.
+              </p>
             ) : (
               <ul className="mt-4 space-y-3">
-                {monthEntries.map((e) => (
-                  <li key={e.id} className="rounded-xl border border-black/10 p-4">
+                {rangeEntries.map((e) => (
+                  <li
+                    key={e.id}
+                    className="rounded-xl border border-black/10 p-4"
+                  >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold">{e.title}</p>
                         <p className="mt-1 text-xs text-muted">
                           {kindLabel(e.kind)} ·{" "}
-                          {e.property_id ? properties[e.property_id]?.name : "Whole farm"}
+                          {e.property_id
+                            ? properties[e.property_id]?.name
+                            : "Whole farm"}
                         </p>
                       </div>
                       <span
@@ -436,7 +780,9 @@ export default function AdminCalendarPage() {
                       {e.contact && <span>{e.contact}</span>}
                     </div>
 
-                    {e.notes && <p className="mt-3 text-sm text-muted">{e.notes}</p>}
+                    {e.notes && (
+                      <p className="mt-3 text-sm text-muted">{e.notes}</p>
+                    )}
 
                     <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-black/10 pt-3 text-xs font-semibold">
                       <label className="flex items-center gap-2 font-normal text-muted">
@@ -444,7 +790,9 @@ export default function AdminCalendarPage() {
                         <select
                           className="rounded-lg border border-black/10 px-2 py-1 text-xs font-semibold"
                           value={e.status}
-                          onChange={(event) => changeStatus(e, event.target.value)}
+                          onChange={(event) =>
+                            changeStatus(e, event.target.value)
+                          }
                         >
                           {STATUSES.map((s) => (
                             <option key={s} value={s}>
@@ -453,6 +801,12 @@ export default function AdminCalendarPage() {
                           ))}
                         </select>
                       </label>
+                      <button
+                        onClick={() => startEditing(e)}
+                        className="text-brand hover:underline"
+                      >
+                        Edit
+                      </button>
                       <button
                         onClick={() => removeEvent(e.id)}
                         className="text-red-600 hover:underline"
@@ -465,12 +819,15 @@ export default function AdminCalendarPage() {
               </ul>
             )}
 
-            {monthTasks.length > 0 && (
+            {view !== "week" && rangeTasks.length > 0 && (
               <div className="mt-8 border-t border-black/10 pt-6">
                 <h4 className="text-sm font-semibold">Tasks assigned</h4>
                 <ul className="mt-4 space-y-3">
-                  {monthTasks.map((task) => (
-                    <li key={task.id} className="rounded-xl border border-black/10 p-4">
+                  {rangeTasks.map((task) => (
+                    <li
+                      key={task.id}
+                      className="rounded-xl border border-black/10 p-4"
+                    >
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold">{task.title}</p>
@@ -478,7 +835,9 @@ export default function AdminCalendarPage() {
                             {[
                               task.area,
                               task.work_type,
-                              task.property_id ? properties[task.property_id]?.name : "Whole farm",
+                              task.property_id
+                                ? properties[task.property_id]?.name
+                                : "Whole farm",
                             ]
                               .filter(Boolean)
                               .join(" · ")}
@@ -491,9 +850,15 @@ export default function AdminCalendarPage() {
                       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
                         <span>{formatDate(task.due_date ?? "")}</span>
                         {task.assignee && <span>{task.assignee}</span>}
-                        {task.minutes != null && <span>{formatMinutes(task.minutes)}</span>}
+                        {task.minutes != null && (
+                          <span>{formatMinutes(task.minutes)}</span>
+                        )}
                       </div>
-                      {task.details && <p className="mt-3 text-sm text-muted">{task.details}</p>}
+                      {task.details && (
+                        <p className="mt-3 text-sm text-muted">
+                          {task.details}
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -502,18 +867,35 @@ export default function AdminCalendarPage() {
                 </p>
               </div>
             )}
+
+            {view === "day" && dayStays.length > 0 && (
+              <div className="mt-8 border-t border-black/10 pt-6">
+                <h4 className="text-sm font-semibold">Guest stays</h4>
+                <ul className="mt-4 space-y-2 text-sm text-muted">
+                  {dayStays.map((stay) => (
+                    <li key={stay.id}>
+                      {stay.firstName} {stay.lastName} · {stay.propertyName} ·{" "}
+                      {formatDate(stay.startDate)} – {formatDate(stay.endDate)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="card">
-        <h2 className="card-title">Schedule something</h2>
+      <section className="card" id="event-form">
+        <h2 className="card-title">
+          {editingId === null ? "Schedule something" : "Edit entry"}
+        </h2>
         <p className="card-subtitle">
-          Add an event, a work order or a contractor visit. Single-day entries only need a first
-          day.
+          {editingId === null
+            ? "Add an event, a work order or a contractor visit. Single-day entries only need a first day."
+            : "Change any detail of this entry, then save it."}
         </p>
 
-        <form onSubmit={addEvent} className="mt-8 grid gap-5 sm:grid-cols-2">
+        <form onSubmit={saveEvent} className="mt-8 grid gap-5 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="field-label" htmlFor="event-title">
               Title
@@ -657,13 +1039,27 @@ export default function AdminCalendarPage() {
             />
           </div>
 
-          <div className="mt-2 flex justify-end border-t border-black/10 pt-5 sm:col-span-2">
+          <div className="mt-2 flex justify-end gap-3 border-t border-black/10 pt-5 sm:col-span-2">
+            {editingId !== null && (
+              <button
+                type="button"
+                className="btn"
+                onClick={resetForm}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="submit"
               className="btn btn-primary"
               disabled={saving || !title.trim() || !startDate}
             >
-              {saving ? "Saving…" : "Add to calendar"}
+              {saving
+                ? "Saving…"
+                : editingId === null
+                  ? "Add to calendar"
+                  : "Save changes"}
             </button>
           </div>
         </form>

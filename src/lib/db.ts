@@ -183,7 +183,9 @@ export interface BookedRange {
 // session was created but not yet paid) hold the dates for 30 minutes so two
 // guests can't pay for the same nights at once, then expire automatically.
 
-export async function getBookedRanges(propertyId: string): Promise<BookedRange[]> {
+export async function getBookedRanges(
+  propertyId: string,
+): Promise<BookedRange[]> {
   await ensureSchema();
   const sql = getSql();
   const bookingRows = (await sql`
@@ -195,7 +197,8 @@ export async function getBookedRanges(propertyId: string): Promise<BookedRange[]
     SELECT start_date, end_date FROM unavailable WHERE property_id = ${propertyId}
   `) as unknown as BookedRange[];
   return [...bookingRows, ...unavailableRows].sort(
-    (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
+    (a, b) =>
+      new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
   );
 }
 
@@ -308,7 +311,10 @@ export async function createPendingBooking(params: {
   return (rows[0] as { id: number }).id;
 }
 
-export async function attachStripeSession(bookingId: number, stripeSessionId: string) {
+export async function attachStripeSession(
+  bookingId: number,
+  stripeSessionId: string,
+) {
   await ensureSchema();
   const sql = getSql();
   await sql`
@@ -354,7 +360,9 @@ export async function calculateTotal(
 ): Promise<{ total: number; breakdown: { date: string; price: number }[] }> {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const nights = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const nights = Math.round(
+    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   const prices = await getPricesForRange(propertyId, startDate, endDate);
   const priceMap = new Map(prices.map((p) => [p.date, p.price]));
@@ -384,7 +392,9 @@ export async function setPricesForRange(
   const sql = getSql();
   const start = new Date(startDate);
   const end = new Date(endDate);
-  const nights = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const nights = Math.round(
+    (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   const dates: string[] = [];
   const cursor = new Date(start);
@@ -425,7 +435,9 @@ export interface BlockedRange {
   reason: string | null;
 }
 
-export async function getBlockedRanges(propertyId: string): Promise<BlockedRange[]> {
+export async function getBlockedRanges(
+  propertyId: string,
+): Promise<BlockedRange[]> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`
@@ -501,7 +513,10 @@ export async function getAllBookings(): Promise<BookingRow[]> {
   return rows as unknown as BookingRow[];
 }
 
-export async function updateBooking(id: number, fields: Partial<BookingRow>): Promise<void> {
+export async function updateBooking(
+  id: number,
+  fields: Partial<BookingRow>,
+): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`SELECT id, property_id FROM bookings WHERE id = ${id}`;
@@ -529,7 +544,9 @@ export async function updateBooking(id: number, fields: Partial<BookingRow>): Pr
       throw new Error("Check-out must be after check-in.");
     }
     if (await hasOverlapExcluding(propertyId, startDate, endDate, id)) {
-      throw new Error("Those dates overlap with another booking or blocked range.");
+      throw new Error(
+        "Those dates overlap with another booking or blocked range.",
+      );
     }
   }
 
@@ -763,7 +780,45 @@ export async function createCalendarEvent(params: {
   `;
 }
 
-export async function setCalendarEventStatus(id: number, status: string): Promise<void> {
+export async function updateCalendarEvent(
+  id: number,
+  params: {
+    propertyId: string | null;
+    title: string;
+    kind: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+    startTime?: string | null;
+    endTime?: string | null;
+    contractor?: string | null;
+    contact?: string | null;
+    notes?: string | null;
+  },
+): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    UPDATE calendar_events SET
+      property_id = ${params.propertyId},
+      title = ${params.title},
+      kind = ${params.kind},
+      status = ${params.status},
+      start_date = ${params.startDate},
+      end_date = ${params.endDate},
+      start_time = ${params.startTime ?? null},
+      end_time = ${params.endTime ?? null},
+      contractor = ${params.contractor ?? null},
+      contact = ${params.contact ?? null},
+      notes = ${params.notes ?? null}
+    WHERE id = ${id}
+  `;
+}
+
+export async function setCalendarEventStatus(
+  id: number,
+  status: string,
+): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`UPDATE calendar_events SET status = ${status} WHERE id = ${id}`;
@@ -827,7 +882,10 @@ export async function createContact(contact: ContactInput): Promise<void> {
   `;
 }
 
-export async function updateContact(id: number, contact: ContactInput): Promise<void> {
+export async function updateContact(
+  id: number,
+  contact: ContactInput,
+): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`
@@ -900,7 +958,10 @@ export async function createStaffMessage(params: {
   `;
 }
 
-export async function deleteStaffMessage(id: number, senderId: string): Promise<void> {
+export async function deleteStaffMessage(
+  id: number,
+  senderId: string,
+): Promise<void> {
   await ensureSchema();
   const sql = getSql();
   await sql`DELETE FROM staff_messages WHERE id = ${id} AND sender_id = ${senderId}`;
