@@ -80,6 +80,18 @@ export function AdminTabs() {
           </Link>
         );
       })}
+      {user && (
+        <button
+          type="button"
+          onClick={() => {
+            window.localStorage.removeItem(MANAGEMENT_USER_KEY);
+            window.location.reload();
+          }}
+          className="rounded-full px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
+        >
+          Log out
+        </button>
+      )}
     </nav>
   );
 }
