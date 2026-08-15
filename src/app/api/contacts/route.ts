@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminGuard } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { ContactInput, createContact, deleteContact, getContacts, updateContact } from "@/lib/db";
 
 interface ContactBody {
@@ -43,7 +43,7 @@ async function readBody(request: NextRequest): Promise<ContactBody | null> {
 }
 
 export async function GET(request: NextRequest) {
-  const denied = adminGuard(request.headers.get("x-admin-token"));
+  const denied = managementGuard(request.headers.get("x-admin-token"), "contacts");
   if (denied) return denied;
 
   try {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   const body = await readBody(request);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "contacts");
   if (denied) return denied;
 
   const contact = toContact(body);
@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest) {
   const body = await readBody(request);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "contacts");
   if (denied) return denied;
 
   const contact = toContact(body);
@@ -101,7 +101,7 @@ export async function DELETE(request: NextRequest) {
   const body = await readBody(request);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "contacts");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminGuard } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { createExpense, deleteExpense, getExpenses, setExpensePaid } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
 
 export async function GET(request: NextRequest) {
-  const denied = adminGuard(request.headers.get("x-admin-token"));
+  const denied = managementGuard(request.headers.get("x-admin-token"), "expenses");
   if (denied) return denied;
 
   try {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "expenses");
   if (denied) return denied;
 
   const { propertyId, date, category, amount } = body;
@@ -71,7 +71,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "expenses");
   if (denied) return denied;
 
   if (typeof body.id !== "number" || typeof body.paid !== "boolean") {
@@ -95,7 +95,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "expenses");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {

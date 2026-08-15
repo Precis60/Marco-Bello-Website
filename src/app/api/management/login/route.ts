@@ -1,9 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminToken } from "@/lib/adminAuth";
+import { createManagementToken } from "@/lib/adminAuth";
 import { validateManagementLogin } from "@/lib/management";
 
+interface Attempt {
+  count: number;
+  resetAt: number;
+}
+
+const loginAttempts = new Map<string, Attempt>();
+const MAX_ATTEMPTS = 10;
+const WINDOW_MS = 15 * 60 * 1000;
+
+function getClientIp(request: NextRequest): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return request.headers.get("x-real-ip")?.trim() ?? "unknown";
+}
+
+function checkRateLimit(ip: string): NextResponse | null {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+
+  if (record && record.resetAt > now) {
+    if (record.count >= MAX_ATTEMPTS) {
+      return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
+    }
+    record.count += 1;
+    return null;
+  }
+
+  loginAttempts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+  return null;
+}
+
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rateLimited = checkRateLimit(ip);
+  if (rateLimited) return rateLimited;
+
   let body: {
     username?: string;
     password?: string;
@@ -30,7 +65,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const token = getAdminToken();
+  const token = createManagementToken(user);
   if (!token) {
     return NextResponse.json({ error: "Admin not configured." }, { status: 500 });
   }

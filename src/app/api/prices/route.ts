@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminToken } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { deletePricesForRange, getPricesForRange, setPricesForRange } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
 
@@ -27,14 +27,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const adminToken = getAdminToken();
-  if (!adminToken) {
-    return NextResponse.json(
-      { error: "Admin pricing is not configured." },
-      { status: 500 },
-    );
-  }
-
   let body: {
     propertyId?: string;
     startDate?: string;
@@ -49,9 +41,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.token?.trim() !== adminToken) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
+  const denied = managementGuard(body.token, "prices");
+  if (denied) return denied;
 
   const { propertyId, startDate, endDate, price } = body;
   if (!propertyId || !getProperty(propertyId) || !startDate || !endDate || typeof price !== "number" || price < 0) {
@@ -71,14 +62,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const adminToken = getAdminToken();
-  if (!adminToken) {
-    return NextResponse.json(
-      { error: "Admin pricing is not configured." },
-      { status: 500 },
-    );
-  }
-
   let body: {
     propertyId?: string;
     startDate?: string;
@@ -92,9 +75,8 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.token?.trim() !== adminToken) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
+  const denied = managementGuard(body.token, "prices");
+  if (denied) return denied;
 
   const { propertyId, startDate, endDate } = body;
   if (!propertyId || !getProperty(propertyId) || !startDate || !endDate) {
