@@ -36,7 +36,7 @@ export function getManagementUserById(id: string): ManagementUser | undefined {
   return managementUsers.find((u) => u.id === id);
 }
 
-export function canAccessTab(user: ManagementUser, tab: string): boolean {
+export function canAccessTab(user: { tabs: string[] }, tab: string): boolean {
   return user.tabs.includes(tab);
 }
 
