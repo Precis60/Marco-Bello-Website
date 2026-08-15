@@ -147,7 +147,9 @@ export default function AdminTasksPage() {
 
   useEffect(() => {
     const saved = window.localStorage.getItem(AUTHOR_STORAGE_KEY);
-    if (saved && staff.some((member) => member.name === saved)) setAuthor(saved);
+    if (saved && staff.some((member) => member.name === saved && member.role !== "Contractor")) {
+      setAuthor(saved);
+    }
   }, []);
 
   const chooseAuthor = (name: string) => {
@@ -318,7 +320,9 @@ export default function AdminTasksPage() {
             <span className="field-label">Who’s adding these tasks</span>
             <div className="mt-3">
               <ChoiceChips
-                options={staff.map((member) => ({ value: member.name, label: member.name }))}
+                options={staff
+                  .filter((member) => member.role !== "Contractor")
+                  .map((member) => ({ value: member.name, label: member.name }))}
                 value={author}
                 onChange={chooseAuthor}
               />
