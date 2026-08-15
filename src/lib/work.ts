@@ -20,7 +20,6 @@ export const WORK_TYPES = [
   "Irrigation",
   "Cleaning",
   "Maintenance & repair",
-  "General contractor",
   "Inspection",
   "Rubbish & green waste",
   "Contractor supervision",
