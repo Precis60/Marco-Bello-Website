@@ -61,11 +61,32 @@ export function validateManagementLogin(
   tab?: string,
 ): ManagementUser | null {
   const user = getManagementUserByUsername(username);
-  if (!user) return null;
+  if (!user) {
+    console.error("Management login: unknown username", username);
+    return null;
+  }
 
-  const storedHash = process.env[`MANAGEMENT_HASH_${user.id.toUpperCase()}`]?.trim();
-  if (!storedHash || !verifyPbkdf2Hash(password, storedHash)) return null;
-  if (tab && !canAccessTab(user, tab)) return null;
+  const envKey = `MANAGEMENT_HASH_${user.id.toUpperCase()}`;
+  const storedHash = process.env[envKey]?.trim();
+  if (!storedHash) {
+    console.error(`Management login: ${envKey} is not set`);
+    return null;
+  }
+
+  if (!storedHash.includes(":") || storedHash.split(":").length !== 2) {
+    console.error(`Management login: ${envKey} format is invalid`);
+    return null;
+  }
+
+  if (!verifyPbkdf2Hash(password, storedHash)) {
+    console.error(`Management login: ${envKey} did not match the supplied password`);
+    return null;
+  }
+
+  if (tab && !canAccessTab(user, tab)) {
+    console.error(`Management login: user ${user.id} has no access to tab ${tab}`);
+    return null;
+  }
 
   return user;
 }
