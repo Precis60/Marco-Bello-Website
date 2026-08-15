@@ -1,7 +1,12 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
 /** Shown on the sign-in screen after the server rejects the token. */
 export const REJECTED_TOKEN = "That token wasn’t accepted. Check it and try again.";
+
+const MANAGEMENT_USER_KEY = "bmf-management-user";
 
 export function AdminLogin({
   token,
@@ -16,29 +21,122 @@ export function AdminLogin({
   description: string;
   error?: string | null;
 }) {
+  const pathname = usePathname();
+  const tab = pathname.split("/").pop() || "";
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [managementError, setManagementError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleManagementLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setManagementError(null);
+    setLoading(true);
+
+    const res = await fetch("/api/management/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username.trim(), password, tab }),
+    });
+
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) {
+      setManagementError(data.error ?? "Couldn’t sign in.");
+      return;
+    }
+
+    if (data.user) {
+      window.localStorage.setItem(MANAGEMENT_USER_KEY, JSON.stringify(data.user));
+      window.dispatchEvent(
+        new CustomEvent("bmf-management-login", { detail: data.user }),
+      );
+    }
+
+    onTokenChange(data.token);
+    onSubmit(e);
+  };
+
+  const handleTokenSubmit = (e: React.FormEvent) => {
+    if (!token.trim()) {
+      e.preventDefault();
+      return;
+    }
+    onSubmit(e);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username.trim() && password) {
+      void handleManagementLogin(e);
+    } else {
+      handleTokenSubmit(e);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-md">
       <div className="card">
         <h2 className="card-title">Sign in</h2>
         <p className="card-subtitle">{description}</p>
-        <form onSubmit={onSubmit} className="mt-6">
-          <label className="field-label" htmlFor="admin-token">
-            Admin token
-          </label>
-          <input
-            id="admin-token"
-            type="password"
-            className="input"
-            placeholder="••••••••••••"
-            value={token}
-            onChange={(e) => onTokenChange(e.target.value.trim())}
-            required
-          />
-          <button type="submit" className="btn btn-primary mt-6 w-full">
-            Continue
+        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+          <div>
+            <label className="field-label" htmlFor="admin-username">
+              Username
+            </label>
+            <input
+              id="admin-username"
+              type="text"
+              className="input"
+              placeholder="e.g. Lucas2013"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="admin-password">
+              Password
+            </label>
+            <input
+              id="admin-password"
+              type="password"
+              className="input"
+              placeholder="••••••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="relative flex items-center gap-4 py-1">
+            <div className="h-px flex-1 bg-black/10" />
+            <span className="text-xs font-semibold uppercase text-muted">or</span>
+            <div className="h-px flex-1 bg-black/10" />
+          </div>
+          <div>
+            <label className="field-label" htmlFor="admin-token">
+              Admin token
+            </label>
+            <input
+              id="admin-token"
+              type="password"
+              className="input"
+              placeholder="••••••••••••"
+              value={token}
+              onChange={(e) => onTokenChange(e.target.value.trim())}
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary w-full"
+            disabled={loading}
+          >
+            {loading ? "Signing in…" : "Continue"}
           </button>
         </form>
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {(error || managementError) && (
+          <p className="mt-4 text-sm text-red-600">{error || managementError}</p>
+        )}
       </div>
     </div>
   );
