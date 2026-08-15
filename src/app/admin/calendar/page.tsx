@@ -755,13 +755,13 @@ export default function AdminCalendarPage() {
                 {view === "day" ? "on this day" : "this month"}.
               </p>
             ) : (
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-4 space-y-2">
                 {rangeEntries.map((e) => (
                   <li
                     key={e.id}
-                    className="rounded-xl border border-black/10 p-4"
+                    className="rounded-lg border border-black/10 p-3"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold">{e.title}</p>
                         <p className="mt-1 text-xs text-muted">
@@ -780,7 +780,7 @@ export default function AdminCalendarPage() {
                       </span>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
                       <span>
                         {formatDate(e.start_date)}
                         {isoDate(e.end_date) !== isoDate(e.start_date) &&
@@ -797,44 +797,41 @@ export default function AdminCalendarPage() {
                     </div>
 
                     {e.notes && (
-                      <p className="mt-3 text-sm text-muted">{e.notes}</p>
+                      <p className="mt-2 text-xs text-muted">{e.notes}</p>
                     )}
 
-                    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-black/10 pt-3 text-xs font-semibold">
-                      <label className="flex items-center gap-2 font-normal text-muted">
-                        Status
-                        <select
-                          className="rounded-lg border border-black/10 px-2 py-1 text-xs font-semibold"
-                          value={e.status}
-                          onChange={(event) =>
-                            changeStatus(e, event.target.value)
-                          }
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-black/10 pt-2 text-xs">
+                      <select
+                        className="rounded border border-black/10 px-2 py-1 text-xs font-semibold"
+                        value={e.status}
+                        onChange={(event) => changeStatus(e, event.target.value)}
+                      >
+                        {STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex items-center gap-3 font-semibold">
+                        <button
+                          onClick={() => startEditing(e)}
+                          className="text-brand hover:underline"
                         >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <button
-                        onClick={() => startEditing(e)}
-                        className="text-brand hover:underline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => duplicateEvent(e)}
-                        className="text-brand hover:underline"
-                      >
-                        Duplicate
-                      </button>
-                      <button
-                        onClick={() => removeEvent(e.id)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Delete
-                      </button>
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => duplicateEvent(e)}
+                          className="text-brand hover:underline"
+                        >
+                          Copy
+                        </button>
+                        <button
+                          onClick={() => removeEvent(e.id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
@@ -844,13 +841,13 @@ export default function AdminCalendarPage() {
             {view !== "week" && rangeTasks.length > 0 && (
               <div className="mt-8 border-t border-black/10 pt-6">
                 <h4 className="text-sm font-semibold">Tasks assigned</h4>
-                <ul className="mt-4 space-y-3">
+                <ul className="mt-4 space-y-2">
                   {rangeTasks.map((task) => (
                     <li
                       key={task.id}
-                      className="rounded-xl border border-black/10 p-4"
+                      className="rounded-lg border border-black/10 p-3"
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-sm font-semibold">{task.title}</p>
                           <p className="mt-1 text-xs text-muted">
@@ -869,7 +866,7 @@ export default function AdminCalendarPage() {
                           {statusLabel(task.status)}
                         </span>
                       </div>
-                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+                      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
                         <span>{formatDate(task.due_date ?? "")}</span>
                         {task.assignee && <span>{task.assignee}</span>}
                         {task.minutes != null && (
