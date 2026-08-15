@@ -72,7 +72,7 @@ export function AdminTabs() {
     };
 
     const resetTimer = () => {
-      if (user) startInactivityTimer();
+      if (hasSessionToken()) startInactivityTimer();
     };
 
     window.addEventListener("bmf-management-login", handleLogin);
@@ -81,7 +81,7 @@ export function AdminTabs() {
     const events = ["mousedown", "keydown", "scroll", "touchstart", "mousemove"];
     events.forEach((event) => window.addEventListener(event, resetTimer));
 
-    if (user) startInactivityTimer();
+    if (hasSessionToken()) startInactivityTimer();
 
     return () => {
       window.removeEventListener("bmf-management-login", handleLogin);
@@ -91,9 +91,11 @@ export function AdminTabs() {
     };
   }, [user]);
 
+  const signedIn = hasSessionToken();
+
   if (pathname === "/admin") return null;
 
-  const visibleTabs = user ? tabs.filter((tab) => user.tabs.includes(tab.key)) : [];
+  const visibleTabs = user ? tabs.filter((tab) => user.tabs.includes(tab.key)) : signedIn ? tabs : [];
 
   return (
     <nav
