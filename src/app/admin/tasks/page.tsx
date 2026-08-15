@@ -23,6 +23,8 @@ interface Task {
   details: string | null;
   assignee: string | null;
   due_date: string | null;
+  start_date: string | null;
+  completed_date: string | null;
   priority: string;
   status: string;
   area: string | null;
@@ -138,7 +140,9 @@ export default function AdminTasksPage() {
 
   const [author, setAuthor] = useState("");
   const [propertyId, setPropertyId] = useState("");
-  const [assignedDate, setAssignedDate] = useState(todayIso());
+  const [dueDate, setDueDate] = useState(todayIso());
+  const [startDate, setStartDate] = useState("");
+  const [completedDate, setCompletedDate] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const [drafts, setDrafts] = useState<TaskDraft[]>([emptyDraft(1, "")]);
 
@@ -246,7 +250,9 @@ export default function AdminTasksPage() {
           title: draft.title.trim(),
           details: draft.details,
           assignee: draft.assignee || author,
-          dueDate: assignedDate,
+          dueDate,
+          startDate,
+          completedDate,
           priority: draft.priority,
           status: draft.status,
           area: draft.area,
@@ -266,7 +272,7 @@ export default function AdminTasksPage() {
     }
 
     setSaved(
-      `${readyDrafts.length} task${readyDrafts.length === 1 ? "" : "s"} added to ${formatDate(assignedDate)}.`,
+      `${readyDrafts.length} task${readyDrafts.length === 1 ? "" : "s"} added for ${formatDate(dueDate)}.`,
     );
     setDrafts([emptyDraft(1, author)]);
     setConfirmed(false);
@@ -337,7 +343,7 @@ export default function AdminTasksPage() {
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label className="field-label" htmlFor="task-property">
-                Site
+                Area
               </label>
               <select
                 id="task-property"
@@ -354,10 +360,22 @@ export default function AdminTasksPage() {
               </select>
             </div>
             <DateField
-              id="task-date"
-              label="Day assigned"
-              value={assignedDate}
-              onChange={setAssignedDate}
+              id="task-due-date"
+              label="Date Due"
+              value={dueDate}
+              onChange={setDueDate}
+            />
+            <DateField
+              id="task-start-date"
+              label="Date Started"
+              value={startDate}
+              onChange={setStartDate}
+            />
+            <DateField
+              id="task-completed-date"
+              label="Date Completed"
+              value={completedDate}
+              onChange={setCompletedDate}
             />
           </div>
         </div>
@@ -536,8 +554,8 @@ export default function AdminTasksPage() {
             onChange={(e) => setConfirmed(e.target.checked)}
           />
           <span>
-            I confirm these tasks are correct and should be scheduled for{" "}
-            <strong>{formatDate(assignedDate)}</strong>.
+            I confirm these tasks are correct and due on{" "}
+            <strong>{formatDate(dueDate)}</strong>.
           </span>
         </label>
 

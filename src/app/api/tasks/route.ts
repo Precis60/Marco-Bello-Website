@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
     details?: string;
     assignee?: string;
     dueDate?: string;
+    startDate?: string;
+    completedDate?: string;
     priority?: string;
     status?: string;
     area?: string;
@@ -71,6 +73,8 @@ export async function POST(request: NextRequest) {
       details: body.details?.trim() || null,
       assignee: body.assignee?.trim() || null,
       dueDate: body.dueDate || null,
+      startDate: body.startDate || null,
+      completedDate: body.completedDate || null,
       priority,
       status,
       area: body.area?.trim() || null,
