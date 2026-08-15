@@ -36,11 +36,9 @@ function readStoredUser(): ManagementUser | null {
 
 export function AdminTabs() {
   const pathname = usePathname();
-  const [user, setUser] = useState<ManagementUser | null>(readStoredUser);
+  const [user, setUser] = useState<ManagementUser | null>(() => readStoredUser());
 
   useEffect(() => {
-    setUser(readStoredUser());
-
     const handleLogin = (e: Event) => {
       const detail = (e as CustomEvent).detail as ManagementUser | undefined;
       setUser(detail ?? readStoredUser());
