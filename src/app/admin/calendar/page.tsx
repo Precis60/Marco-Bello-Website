@@ -161,8 +161,7 @@ export default function AdminCalendarPage() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  const login = (e: React.FormEvent) => {
-    e.preventDefault();
+  const login = () => {
     setAuthenticated(true);
   };
 

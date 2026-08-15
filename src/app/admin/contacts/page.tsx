@@ -59,8 +59,7 @@ export default function AdminContactsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const login = (e: React.FormEvent) => {
-    e.preventDefault();
+  const login = () => {
     setAuthenticated(true);
   };
 

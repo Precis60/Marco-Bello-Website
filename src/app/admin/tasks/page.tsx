@@ -165,8 +165,7 @@ export default function AdminTasksPage() {
     );
   };
 
-  const login = (e: React.FormEvent) => {
-    e.preventDefault();
+  const login = () => {
     setAuthenticated(true);
   };
 

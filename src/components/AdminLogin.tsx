@@ -1,12 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /** Shown on the sign-in screen after the server rejects the token. */
 export const REJECTED_TOKEN = "That token wasn’t accepted. Check it and try again.";
 
 const MANAGEMENT_USER_KEY = "bmf-management-user";
+const MANAGEMENT_TOKEN_KEY = "bmf-management-token";
 
 export function AdminLogin({
   token,
@@ -17,7 +18,7 @@ export function AdminLogin({
 }: {
   token: string;
   onTokenChange: (token: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: () => void;
   description: string;
   error?: string | null;
 }) {
@@ -28,6 +29,32 @@ export function AdminLogin({
   const [password, setPassword] = useState("");
   const [managementError, setManagementError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [autoLoggingIn] = useState(() =>
+    typeof window !== "undefined" && !!window.sessionStorage.getItem(MANAGEMENT_TOKEN_KEY),
+  );
+
+  useEffect(() => {
+    const stored = window.sessionStorage.getItem(MANAGEMENT_TOKEN_KEY);
+    if (stored && !token) {
+      onTokenChange(stored);
+      onSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const finishLogin = (authToken: string, user?: unknown) => {
+    window.sessionStorage.setItem(MANAGEMENT_TOKEN_KEY, authToken);
+    onTokenChange(authToken);
+
+    if (user) {
+      window.localStorage.setItem(MANAGEMENT_USER_KEY, JSON.stringify(user));
+      window.dispatchEvent(
+        new CustomEvent("bmf-management-login", { detail: user }),
+      );
+    }
+
+    onSubmit();
+  };
 
   const handleManagementLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,23 +75,13 @@ export function AdminLogin({
       return;
     }
 
-    if (data.user) {
-      window.localStorage.setItem(MANAGEMENT_USER_KEY, JSON.stringify(data.user));
-      window.dispatchEvent(
-        new CustomEvent("bmf-management-login", { detail: data.user }),
-      );
-    }
-
-    onTokenChange(data.token);
-    onSubmit(e);
+    finishLogin(data.token, data.user);
   };
 
   const handleTokenSubmit = (e: React.FormEvent) => {
-    if (!token.trim()) {
-      e.preventDefault();
-      return;
-    }
-    onSubmit(e);
+    e.preventDefault();
+    if (!token.trim()) return;
+    finishLogin(token);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,6 +92,14 @@ export function AdminLogin({
       handleTokenSubmit(e);
     }
   };
+
+  if (autoLoggingIn) {
+    return (
+      <div className="mx-auto max-w-md py-12 text-center text-sm text-muted">
+        Resuming session…
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-md">

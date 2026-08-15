@@ -85,8 +85,7 @@ export default function AdminMessengerPage() {
     if (thread) thread.scrollTop = thread.scrollHeight;
   }, [messages]);
 
-  const login = (e: React.FormEvent) => {
-    e.preventDefault();
+  const login = () => {
     setAuthenticated(true);
   };
 

@@ -91,8 +91,7 @@ export default function AdminBookingsPage() {
     return Array.from({ length: 7 }, (_, i) => current - 1 + i);
   }, []);
 
-  const login = (e: React.FormEvent) => {
-    e.preventDefault();
+  const login = () => {
     setAuthenticated(true);
   };
 
