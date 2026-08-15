@@ -117,7 +117,7 @@ export function AdminTabs() {
           </Link>
         );
       })}
-      {user && (
+      {signedIn && (
         <button
           type="button"
           onClick={() => clearSession()}

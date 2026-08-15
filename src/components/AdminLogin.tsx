@@ -29,15 +29,11 @@ export function AdminLogin({
   const [password, setPassword] = useState("");
   const [managementError, setManagementError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [autoLoggingIn] = useState(() =>
-    typeof window !== "undefined" && !!window.sessionStorage.getItem(MANAGEMENT_TOKEN_KEY),
-  );
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(MANAGEMENT_TOKEN_KEY);
     if (stored && !token) {
       onTokenChange(stored);
-      onSubmit();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -92,14 +88,6 @@ export function AdminLogin({
       handleTokenSubmit(e);
     }
   };
-
-  if (autoLoggingIn) {
-    return (
-      <div className="mx-auto max-w-md py-12 text-center text-sm text-muted">
-        Resuming session…
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-md">
