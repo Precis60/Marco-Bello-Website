@@ -8,6 +8,7 @@ export const staff: StaffMember[] = [
   { id: "lucas-anderson", name: "Lucas Anderson", role: "Junior Property Manager" },
   { id: "jamie-anderson", name: "Jamie Anderson", role: "Property Manager" },
   { id: "mara-sambucco", name: "Mara Sambucco", role: "Home Owner" },
+  { id: "shane-campbell", name: "Shane Campbell", role: "Contractor" },
 ];
 
 export function getStaffMember(id: string): StaffMember | undefined {
