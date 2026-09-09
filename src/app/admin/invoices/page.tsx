@@ -86,27 +86,36 @@ export default function AdminInvoicesPage() {
   const [status, setStatus] = useState("draft");
   const [drafts, setDrafts] = useState<ItemDraft[]>([{ ...emptyItem }]);
 
-  const loadInvoices = async () => {
+  const loadInvoices = async (): Promise<Invoice[] | null> => {
     const res = await fetch("/api/invoices", { headers: { "x-admin-token": token } });
     if (!res.ok) {
       const data = await res.json();
       if (res.status === 401) {
         setAuthenticated(false);
         setError(REJECTED_TOKEN);
+      } else if (res.status === 403) {
+        setError("This sign-in doesn’t have access to invoices.");
       } else {
         setError(data.error ?? "Couldn’t load invoices.");
       }
       setInvoices(null);
-      return;
+      return null;
     }
     const data = await res.json();
-    setInvoices((data.invoices ?? []) as Invoice[]);
+    const loaded = (data.invoices ?? []) as Invoice[];
+    setInvoices(loaded);
     setError(null);
+    return loaded;
   };
 
   useEffect(() => {
     if (!authenticated) return;
-    loadInvoices();
+    loadInvoices().then((loaded) => {
+      if (!loaded) return;
+      setInvoiceNo((current) =>
+        current || nextInvoiceNumber(loaded.map((invoice) => invoice.invoice_no)),
+      );
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authenticated]);
 
@@ -129,9 +138,10 @@ export default function AdminInvoicesPage() {
     items,
   };
 
-  const resetForm = () => {
+  /** `known` is the freshly loaded list, so the next number isn't taken from stale state. */
+  const resetForm = (known?: Invoice[]) => {
     setEditingId(null);
-    setInvoiceNo(nextInvoiceNumber((invoices ?? []).map((invoice) => invoice.invoice_no)));
+    setInvoiceNo(nextInvoiceNumber((known ?? invoices ?? []).map((invoice) => invoice.invoice_no)));
     setInvoiceDate(isoDate(new Date().toISOString()));
     setDueDate("");
     setBillTo("");
@@ -194,8 +204,8 @@ export default function AdminInvoicesPage() {
     });
 
     if (res.ok) {
-      await loadInvoices();
-      if (!editingId) resetForm();
+      const loaded = await loadInvoices();
+      if (!editingId) resetForm(loaded ?? []);
     } else {
       const data = await res.json();
       setError(data.error ?? "Couldn’t save that invoice.");
@@ -229,10 +239,7 @@ export default function AdminInvoicesPage() {
       <AdminLogin
         token={token}
         onTokenChange={setToken}
-        onSubmit={(e) => {
-          e.preventDefault();
-          setAuthenticated(true);
-        }}
+        onSubmit={() => setAuthenticated(true)}
         description="Enter the admin token to raise and edit invoices."
         error={error}
       />
@@ -251,7 +258,7 @@ export default function AdminInvoicesPage() {
             </p>
           </div>
           {editingId && (
-            <button type="button" className="btn btn-secondary" onClick={resetForm}>
+            <button type="button" className="btn btn-secondary" onClick={() => resetForm()}>
               Start a new invoice
             </button>
           )}

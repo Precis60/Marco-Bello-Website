@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminGuard } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import {
   createInvoice,
   deleteInvoice,
@@ -92,7 +92,7 @@ async function readBody(request: NextRequest): Promise<InvoiceBody | null> {
 }
 
 export async function GET(request: NextRequest) {
-  const denied = adminGuard(request.headers.get("x-admin-token"));
+  const denied = managementGuard(request.headers.get("x-admin-token"), "invoices");
   if (denied) return denied;
 
   try {
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
   const body = await readBody(request);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "invoices");
   if (denied) return denied;
 
   const invoice = parseInvoice(body);
@@ -129,7 +129,7 @@ export async function PUT(request: NextRequest) {
   const body = await readBody(request);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "invoices");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {
@@ -154,7 +154,7 @@ export async function DELETE(request: NextRequest) {
   const body = await readBody(request);
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "invoices");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {

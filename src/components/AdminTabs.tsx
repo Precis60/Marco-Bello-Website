@@ -11,15 +11,15 @@ interface ManagementUser {
 }
 
 const tabs = [
-  { href: "/admin/blocks", label: "Blocks" },
-  { href: "/admin/bookings", label: "Bookings" },
-  { href: "/admin/calendar", label: "Calendar" },
-  { href: "/admin/contacts", label: "Contacts" },
-  { href: "/admin/expenses", label: "Expenses" },
-  { href: "/admin/invoices", label: "Invoices" },
-  { href: "/admin/messenger", label: "Messenger" },
-  { href: "/admin/prices", label: "Prices" },
-  { href: "/admin/tasks", label: "Tasks" },
+  { href: "/admin/blocks", label: "Blocks", key: "blocks" },
+  { href: "/admin/bookings", label: "Bookings", key: "bookings" },
+  { href: "/admin/calendar", label: "Calendar", key: "calendar" },
+  { href: "/admin/contacts", label: "Contacts", key: "contacts" },
+  { href: "/admin/expenses", label: "Expenses", key: "expenses" },
+  { href: "/admin/invoices", label: "Invoices", key: "invoices" },
+  { href: "/admin/messenger", label: "Messenger", key: "messenger" },
+  { href: "/admin/prices", label: "Prices", key: "prices" },
+  { href: "/admin/tasks", label: "Tasks", key: "tasks" },
 ];
 
 const MANAGEMENT_USER_KEY = "bmf-management-user";
