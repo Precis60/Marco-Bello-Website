@@ -174,6 +174,38 @@ body {
   font-weight: 600;
 }
 
+/* Printing an admin invoice puts the sheet alone on the page, so "Save as PDF"
+   in the browser's print dialog produces the invoice by itself. */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .invoice-sheet,
+  .invoice-sheet * {
+    visibility: visible !important;
+  }
+
+  .invoice-sheet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    background: #ffffff;
+  }
+}
+
 @layer base {
   ::selection {
     background: color-mix(in srgb, var(--brand) 20%, transparent);

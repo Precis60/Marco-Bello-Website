@@ -16,6 +16,7 @@ const tabs = [
   { href: "/admin/calendar", label: "Calendar", key: "calendar" },
   { href: "/admin/contacts", label: "Contacts", key: "contacts" },
   { href: "/admin/expenses", label: "Expenses", key: "expenses" },
+  { href: "/admin/invoices", label: "Invoices", key: "invoices" },
   { href: "/admin/messenger", label: "Messenger", key: "messenger" },
   { href: "/admin/prices", label: "Prices", key: "prices" },
   { href: "/admin/tasks", label: "Tasks", key: "tasks" },

@@ -24,7 +24,17 @@ export function AdminLogin({
 }) {
   const pathname = usePathname();
   const pathTab = pathname.split("/").pop() || "";
-  const allowedTabs = ["blocks", "bookings", "calendar", "contacts", "expenses", "messenger", "prices", "tasks"];
+  const allowedTabs = [
+    "blocks",
+    "bookings",
+    "calendar",
+    "contacts",
+    "expenses",
+    "invoices",
+    "messenger",
+    "prices",
+    "tasks",
+  ];
   const tab = allowedTabs.includes(pathTab) ? pathTab : undefined;
 
   const [username, setUsername] = useState("");
