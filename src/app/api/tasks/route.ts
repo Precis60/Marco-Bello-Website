@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminGuard } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { createTask, deleteTask, getTasks, setTaskStatus } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
 
@@ -8,7 +8,7 @@ const PRIORITIES = ["low", "medium", "high"];
 const STATUSES = ["open", "in-progress", "done"];
 
 export async function GET(request: NextRequest) {
-  const denied = adminGuard(request.headers.get("x-admin-token"));
+  const denied = managementGuard(request.headers.get("x-admin-token"), "tasks");
   if (denied) return denied;
 
   try {
@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
     details?: string;
     assignee?: string;
     dueDate?: string;
+    startDate?: string;
+    completedDate?: string;
     priority?: string;
     status?: string;
     area?: string;
@@ -42,7 +44,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "tasks");
   if (denied) return denied;
 
   const title = body.title?.trim();
@@ -71,6 +73,8 @@ export async function POST(request: NextRequest) {
       details: body.details?.trim() || null,
       assignee: body.assignee?.trim() || null,
       dueDate: body.dueDate || null,
+      startDate: body.startDate || null,
+      completedDate: body.completedDate || null,
       priority,
       status,
       area: body.area?.trim() || null,
@@ -93,7 +97,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "tasks");
   if (denied) return denied;
 
   if (typeof body.id !== "number" || !body.status || !STATUSES.includes(body.status)) {
@@ -117,7 +121,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "tasks");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {

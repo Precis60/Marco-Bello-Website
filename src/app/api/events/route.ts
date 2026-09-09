@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminGuard } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import {
   createCalendarEvent,
   deleteCalendarEvent,
@@ -14,7 +14,7 @@ const KINDS = ["event", "scheduled-work", "confirmed-work", "contractor"];
 const STATUSES = ["scheduled", "confirmed", "completed", "cancelled"];
 
 export async function GET(request: NextRequest) {
-  const denied = adminGuard(request.headers.get("x-admin-token"));
+  const denied = managementGuard(request.headers.get("x-admin-token"), "calendar");
   if (denied) return denied;
 
   try {
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "calendar");
   if (denied) return denied;
 
   const parsed = readEventFields(body);
@@ -152,7 +152,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "calendar");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {
@@ -198,7 +198,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "calendar");
   if (denied) return denied;
 
   if (typeof body.id !== "number") {

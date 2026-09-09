@@ -35,8 +35,7 @@ export default function AdminBlocksPage() {
 
   const nights = start && end ? nightsBetween(start, end) : 0;
 
-  const login = (e: React.FormEvent) => {
-    e.preventDefault();
+  const login = () => {
     setAuthenticated(true);
   };
 

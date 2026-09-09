@@ -127,6 +127,12 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS created_by TEXT
       `;
 
+      await sql`
+        ALTER TABLE tasks
+          ADD COLUMN IF NOT EXISTS start_date DATE,
+          ADD COLUMN IF NOT EXISTS completed_date DATE
+      `;
+
       // end_date is the last day of the entry (inclusive), unlike bookings.
       await sql`
         CREATE TABLE IF NOT EXISTS calendar_events (
@@ -668,6 +674,8 @@ export interface TaskRow {
   details: string | null;
   assignee: string | null;
   due_date: string | null;
+  start_date: string | null;
+  completed_date: string | null;
   priority: string;
   status: string;
   area: string | null;
@@ -682,8 +690,9 @@ export async function getTasks(): Promise<TaskRow[]> {
   await ensureSchema();
   const sql = getSql();
   const rows = await sql`
-    SELECT id, property_id, title, details, assignee, due_date, priority, status,
-           area, work_type, minutes, created_by, created_at, completed_at
+    SELECT id, property_id, title, details, assignee, due_date, start_date,
+           completed_date, priority, status, area, work_type, minutes, created_by,
+           created_at, completed_at
     FROM tasks
     ORDER BY due_date ASC NULLS LAST, id DESC
   `;
@@ -696,6 +705,8 @@ export async function createTask(params: {
   details?: string | null;
   assignee?: string | null;
   dueDate?: string | null;
+  startDate?: string | null;
+  completedDate?: string | null;
   priority: string;
   status?: string;
   area?: string | null;
@@ -707,8 +718,8 @@ export async function createTask(params: {
   const sql = getSql();
   await sql`
     INSERT INTO tasks (
-      property_id, title, details, assignee, due_date, priority, status,
-      area, work_type, minutes, created_by
+      property_id, title, details, assignee, due_date, start_date, completed_date,
+      priority, status, area, work_type, minutes, created_by
     )
     VALUES (
       ${params.propertyId},
@@ -716,6 +727,8 @@ export async function createTask(params: {
       ${params.details ?? null},
       ${params.assignee ?? null},
       ${params.dueDate ?? null},
+      ${params.startDate ?? null},
+      ${params.completedDate ?? null},
       ${params.priority},
       ${params.status ?? "open"},
       ${params.area ?? null},

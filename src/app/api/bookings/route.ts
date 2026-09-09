@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminToken } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { calculateTotal, deleteBooking, getAllBookings, updateBooking } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
 
 function requireAuth(request: NextRequest):
   | { ok: true; token: string }
   | { ok: false; response: NextResponse } {
-  const adminToken = getAdminToken();
-  if (!adminToken) {
-    return { ok: false, response: NextResponse.json({ error: "Admin not configured." }, { status: 500 }) };
-  }
+  const denied = managementGuard(request.headers.get("x-admin-token"), "bookings");
+  if (denied) return { ok: false, response: denied };
 
-  const token = request.headers.get("x-admin-token");
-  if (token?.trim() !== adminToken) {
-    return { ok: false, response: NextResponse.json({ error: "Unauthorized." }, { status: 401 }) };
-  }
-
+  const token = request.headers.get("x-admin-token") ?? "";
   return { ok: true, token };
 }
 

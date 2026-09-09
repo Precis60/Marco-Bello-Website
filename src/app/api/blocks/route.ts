@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminToken } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { createBlockedRange, deleteBlockedRange, getBlockedRanges } from "@/lib/db";
 import { getProperty } from "@/lib/properties";
 
 export async function GET(request: NextRequest) {
+  const denied = managementGuard(request.headers.get("x-admin-token"), "blocks");
+  if (denied) return denied;
+
   const propertyId = request.nextUrl.searchParams.get("propertyId") ?? "";
   if (!getProperty(propertyId)) {
     return NextResponse.json({ error: "Unknown property." }, { status: 400 });
@@ -23,11 +26,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const adminToken = getAdminToken();
-  if (!adminToken) {
-    return NextResponse.json({ error: "Admin not configured." }, { status: 500 });
-  }
-
   let body: {
     token?: string;
     propertyId?: string;
@@ -42,9 +40,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.token?.trim() !== adminToken) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
+  const denied = managementGuard(body.token, "blocks");
+  if (denied) return denied;
 
   const { propertyId, startDate, endDate, reason } = body;
   if (!propertyId || !getProperty(propertyId) || !startDate || !endDate) {
@@ -64,11 +61,6 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const adminToken = getAdminToken();
-  if (!adminToken) {
-    return NextResponse.json({ error: "Admin not configured." }, { status: 500 });
-  }
-
   let body: { token?: string; id?: number };
   try {
     body = await request.json();
@@ -76,9 +68,8 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (body.token?.trim() !== adminToken) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
+  const denied = managementGuard(body.token, "blocks");
+  if (denied) return denied;
 
   if (typeof body.id !== "number") {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });

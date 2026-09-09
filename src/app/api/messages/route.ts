@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { adminGuard } from "@/lib/adminAuth";
+import { managementGuard } from "@/lib/adminAuth";
 import { createStaffMessage, deleteStaffMessage, getStaffMessages } from "@/lib/db";
 import { getStaffMember } from "@/lib/staff";
 
 export async function GET(request: NextRequest) {
-  const denied = adminGuard(request.headers.get("x-admin-token"));
+  const denied = managementGuard(request.headers.get("x-admin-token"), "messenger");
   if (denied) return denied;
 
   const viewerId = request.nextUrl.searchParams.get("viewerId") ?? "";
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "messenger");
   if (denied) return denied;
 
   const message = body.body?.trim();
@@ -70,7 +70,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const denied = adminGuard(body.token);
+  const denied = managementGuard(body.token, "messenger");
   if (denied) return denied;
 
   if (typeof body.id !== "number" || !body.senderId || !getStaffMember(body.senderId)) {
