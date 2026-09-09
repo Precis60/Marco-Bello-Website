@@ -1,5 +1,7 @@
 import postgres from "postgres";
 
+import type { InvoiceItem } from "./invoices";
+
 let sqlClient: ReturnType<typeof postgres> | null = null;
 
 function getSql() {
@@ -167,6 +169,30 @@ async function ensureSchema() {
           address TEXT,
           notes TEXT,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        )
+      `;
+
+      // Line items live in `items` as JSON so an invoice is read and written in
+      // one query; totals are derived from them rather than stored.
+      await sql`
+        CREATE TABLE IF NOT EXISTS invoices (
+          id SERIAL PRIMARY KEY,
+          invoice_no TEXT NOT NULL,
+          invoice_date DATE NOT NULL,
+          due_date DATE,
+          bill_to TEXT NOT NULL DEFAULT '',
+          reference TEXT,
+          contact_phone TEXT,
+          contact_email TEXT,
+          contact_web TEXT,
+          account_name TEXT,
+          bsb TEXT,
+          account_no TEXT,
+          notes TEXT,
+          status TEXT NOT NULL DEFAULT 'draft',
+          items JSONB NOT NULL DEFAULT '[]'::jsonb,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
       `;
     })();
@@ -965,4 +991,116 @@ export async function deleteStaffMessage(
   await ensureSchema();
   const sql = getSql();
   await sql`DELETE FROM staff_messages WHERE id = ${id} AND sender_id = ${senderId}`;
+}
+
+export interface InvoiceRow {
+  id: number;
+  invoice_no: string;
+  invoice_date: string;
+  due_date: string | null;
+  bill_to: string;
+  reference: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  contact_web: string | null;
+  account_name: string | null;
+  bsb: string | null;
+  account_no: string | null;
+  notes: string | null;
+  status: string;
+  items: InvoiceItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InvoiceInput {
+  invoiceNo: string;
+  invoiceDate: string;
+  dueDate?: string | null;
+  billTo: string;
+  reference?: string | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
+  contactWeb?: string | null;
+  accountName?: string | null;
+  bsb?: string | null;
+  accountNo?: string | null;
+  notes?: string | null;
+  status: string;
+  items: InvoiceItem[];
+}
+
+const INVOICE_COLUMNS =
+  "id, invoice_no, invoice_date, due_date, bill_to, reference, contact_phone, contact_email, contact_web, account_name, bsb, account_no, notes, status, items, created_at, updated_at";
+
+export async function getInvoices(): Promise<InvoiceRow[]> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    SELECT ${sql.unsafe(INVOICE_COLUMNS)} FROM invoices
+    ORDER BY invoice_date DESC, id DESC
+  `;
+  return rows as unknown as InvoiceRow[];
+}
+
+export async function createInvoice(invoice: InvoiceInput): Promise<number> {
+  await ensureSchema();
+  const sql = getSql();
+  const rows = await sql`
+    INSERT INTO invoices (
+      invoice_no, invoice_date, due_date, bill_to, reference, contact_phone,
+      contact_email, contact_web, account_name, bsb, account_no, notes, status, items
+    )
+    VALUES (
+      ${invoice.invoiceNo},
+      ${invoice.invoiceDate},
+      ${invoice.dueDate ?? null},
+      ${invoice.billTo},
+      ${invoice.reference ?? null},
+      ${invoice.contactPhone ?? null},
+      ${invoice.contactEmail ?? null},
+      ${invoice.contactWeb ?? null},
+      ${invoice.accountName ?? null},
+      ${invoice.bsb ?? null},
+      ${invoice.accountNo ?? null},
+      ${invoice.notes ?? null},
+      ${invoice.status},
+      ${sql.json(invoice.items as unknown as postgres.JSONValue)}
+    )
+    RETURNING id
+  `;
+  return (rows as unknown as { id: number }[])[0].id;
+}
+
+export async function updateInvoice(
+  id: number,
+  invoice: InvoiceInput,
+): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`
+    UPDATE invoices
+    SET invoice_no = ${invoice.invoiceNo},
+        invoice_date = ${invoice.invoiceDate},
+        due_date = ${invoice.dueDate ?? null},
+        bill_to = ${invoice.billTo},
+        reference = ${invoice.reference ?? null},
+        contact_phone = ${invoice.contactPhone ?? null},
+        contact_email = ${invoice.contactEmail ?? null},
+        contact_web = ${invoice.contactWeb ?? null},
+        account_name = ${invoice.accountName ?? null},
+        bsb = ${invoice.bsb ?? null},
+        account_no = ${invoice.accountNo ?? null},
+        notes = ${invoice.notes ?? null},
+        status = ${invoice.status},
+        items = ${sql.json(invoice.items as unknown as postgres.JSONValue)},
+        updated_at = now()
+    WHERE id = ${id}
+  `;
+}
+
+export async function deleteInvoice(id: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM invoices WHERE id = ${id}`;
 }
