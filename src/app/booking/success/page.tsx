@@ -11,12 +11,13 @@ export default function BookingSuccessPage() {
             Booking confirmed
           </h1>
           <p className="mt-4 text-base leading-7 text-muted">
-            Thank you — your payment was successful and your stay is booked.
-            A confirmation will be sent to your email shortly. If you have
-            any questions in the meantime, feel free to get in touch.
+            Thank you. Your payment was successful and your stay is booked.
+            A confirmation will be sent to your email. Pool and spa temperature
+            requests are confirmed before you arrive. The Victorian 7.5% short
+            stay levy, if it applies, is not part of the amount you just paid.
           </p>
-          <Link href="/rentals" className="btn btn-primary mt-8 inline-flex">
-            Back to rentals
+          <Link href="/villa-di-marco" className="btn btn-primary mt-8 inline-flex">
+            Back to Villa Di Marco
           </Link>
         </div>
       </Container>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Container } from "@/components/Container";
+import { ADDRESS_LINE, BRAND, EMAIL, NAV_LINKS, PHONE_DISPLAY, PHONE_TEL } from "@/lib/site";
 
 export function SiteFooter() {
   return (
@@ -8,62 +9,57 @@ export function SiteFooter() {
       <Container className="py-12">
         <div className="grid gap-10 md:grid-cols-3">
           <div className="space-y-3">
-            <div className="text-sm font-semibold tracking-[0.18em] uppercase">
-              Marco Bello
-            </div>
-            <p className="text-sm text-muted">
-              Bello Marco Farm produces locally made honey, wine, olive oil, vegetables, herbs, fruit, plants, and hay 
-              — fresh, natural, and sustainably grown in Victoria.
+            <div className="text-sm font-semibold tracking-[0.18em] uppercase">{BRAND}</div>
+            <p className="text-sm leading-6 text-muted">
+              A luxury farm stay on Murradoc Hill, Drysdale, the highest point on the Bellarine Peninsula.
+              Villa Di Marco, La Stalla, and The Estate.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6 text-sm">
             <div className="space-y-2">
-              <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
-                Explore
-              </div>
+              <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Stay</div>
               <div className="flex flex-col gap-2">
-                <Link className="footerlink" href="/rentals">
-                  Rentals
-                </Link>
-                <Link className="footerlink" href="/farm-sales">
-                  Farm sales
-                </Link>
-                <Link className="footerlink" href="/about">
-                  About
-                </Link>
+                {NAV_LINKS.slice(0, 4).map((link) => (
+                  <Link key={link.href} className="footerlink" href={link.href}>
+                    {link.label}
+                  </Link>
+                ))}
               </div>
             </div>
             <div className="space-y-2">
-              <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
-                Get in touch
-              </div>
+              <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Visit</div>
               <div className="flex flex-col gap-2">
+                {NAV_LINKS.slice(4).map((link) => (
+                  <Link key={link.href} className="footerlink" href={link.href}>
+                    {link.label}
+                  </Link>
+                ))}
                 <Link className="footerlink" href="/contact">
                   Enquire
                 </Link>
-                <a className="footerlink" href="mailto:admin@bellomarco.com.au">
-                  admin@bellomarco.com.au
-                </a>
-                <a className="footerlink" href="tel:+61413729663">
-                  0413 729 663
-                </a>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
-              Location
-            </div>
-            <p className="text-sm text-muted">
-              275 Founds Road, DRYSDALE VIC 3222
-            </p>
+          <div className="space-y-3 text-sm">
+            <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Contact</div>
+            <p className="text-muted">{ADDRESS_LINE}</p>
+            <a className="footerlink block" href={`mailto:${EMAIL}`}>
+              {EMAIL}
+            </a>
+            <a className="footerlink block" href={`tel:${PHONE_TEL}`}>
+              {PHONE_DISPLAY}
+            </a>
           </div>
         </div>
 
-        <div className="mt-10 border-t border-black/10 pt-6 text-xs text-muted">
-          <div>© {new Date().getFullYear()} Marco Bello. All rights reserved.</div>
+        <div className="mt-10 space-y-2 border-t border-black/10 pt-6 text-xs leading-5 text-muted">
+          <div>© {new Date().getFullYear()} {BRAND}. All rights reserved.</div>
+          <p>
+            The Victorian 7.5% short stay levy applies to stays under 28 days. Check-in is 2:00pm and check-out is 10:00am.
+            Pets are welcome in Villa Di Marco — please don&apos;t feed the farm animals.
+          </p>
         </div>
       </Container>
     </footer>
