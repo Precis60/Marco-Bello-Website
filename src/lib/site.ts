@@ -22,6 +22,7 @@ export const NAV_LINKS = [
   { href: "/the-estate", label: "The Estate" },
   { href: "/experiences", label: "Experiences" },
   { href: "/pantry", label: "Pantry" },
+  { href: "/cellar-doors", label: "Cellar doors" },
   { href: "/events", label: "Events" },
   { href: "/the-farm", label: "The Farm" },
 ] as const;

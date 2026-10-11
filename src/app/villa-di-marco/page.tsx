@@ -58,6 +58,7 @@ export default function VillaPage() {
               { label: "Pets", value: "Welcome, maximum 2. Please don't feed the farm animals." },
               { label: "Pool and spa", value: "Included, heated to the temperature you choose" },
               { label: "Garden", value: "Fully renovated landscaped garden on the 76-acre farm" },
+              { label: "Welcome gift", value: "Estate olive oil" },
             ]}
           />
         </div>

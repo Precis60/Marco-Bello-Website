@@ -22,7 +22,7 @@ export const PANTRY_GROUPS: { title: string; items: PricedOffer[] }[] = [
         id: "hamper",
         name: "Welcome or celebration hamper",
         detail:
-          "Local produce, packed before you arrive. Indicative range $95–$180 depending on the hamper.",
+          "Food only: local produce, packed before you arrive. Indicative range $95–$180. The stay's welcome gift is estate olive oil, separate from this hamper.",
         fromPrice: 95,
         priceLabel: "From $95",
       },
@@ -80,9 +80,10 @@ export const PANTRY_GROUPS: { title: string; items: PricedOffer[] }[] = [
         priceLabel: "Price on request",
       },
       {
-        id: "oil",
-        name: "Oil",
-        detail: "A bottle of oil for the kitchen. Price confirmed with your request.",
+        id: "olive-oil",
+        name: "Estate olive oil",
+        detail:
+          "Extra estate olive oil for the kitchen. The welcome gift with the stay is already estate olive oil. Price confirmed with your request.",
         fromPrice: null,
         priceLabel: "Price on request",
       },
@@ -108,28 +109,32 @@ export const CHEF_MENUS: PricedOffer[] = [
   {
     id: "farmhouse-feast",
     name: "Farmhouse Feast",
-    detail: "A private chef dinner with local staff. Minimum spend $900.",
+    detail:
+      "A private chef dinner with local staff. Minimum spend $900. Drinks are BYO, or you order and pay a licensed retailer.",
     fromPrice: 110,
     priceLabel: "From $110 a person",
   },
   {
     id: "signature-dinner",
     name: "Signature Dinner",
-    detail: "A longer private chef dinner. Minimum spend $1,200.",
+    detail:
+      "A longer private chef dinner. Minimum spend $1,200. Drinks are BYO, or you order and pay a licensed retailer.",
     fromPrice: 150,
     priceLabel: "From $150 a person",
   },
   {
     id: "bellarine-degustation",
     name: "Bellarine Degustation",
-    detail: "A degustation dinner cooked for your group. Minimum spend $1,600.",
+    detail:
+      "A degustation dinner cooked for your group. Minimum spend $1,600. Drinks are BYO, or you order and pay a licensed retailer.",
     fromPrice: 200,
     priceLabel: "From $200 a person",
   },
   {
     id: "brunch",
     name: "Brunch",
-    detail: "A private chef brunch. Minimum spend $450.",
+    detail:
+      "A private chef brunch. Minimum spend $450. Drinks are BYO, or you order and pay a licensed retailer.",
     fromPrice: 55,
     priceLabel: "From $55 a person",
   },
@@ -191,7 +196,8 @@ export const OTHER_ADD_ONS: PricedOffer[] = [
   {
     id: "transfers",
     name: "Winery transfers",
-    detail: "A driver for the Bellarine Taste Trail or nearby cellar doors. Quoted for the trip.",
+    detail:
+      "A driver to local cellar doors. You order and pay the retailer. The transfer is the only thing we quote.",
     fromPrice: null,
     priceLabel: "Quote on request",
   },

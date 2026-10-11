@@ -45,7 +45,11 @@ export default function ExperiencesPage() {
           <h2 className="text-3xl font-semibold tracking-tight">Private chef</h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
             Menus are cooked for your group by local chefs. The from-price is per person, and each menu has a
-            minimum spend.
+            minimum spend. Drinks are BYO, or you order and pay a licensed retailer. See{" "}
+            <Link href="/cellar-doors" className="underline underline-offset-2">
+              local cellar doors and bottle shops
+            </Link>
+            . We do not supply alcohol with the dinner.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {CHEF_MENUS.map((offer) => (

@@ -35,6 +35,8 @@ export default function FarmPage() {
               { label: "Views", value: "Bay and Melbourne skyline" },
               { label: "Garden", value: "The landscaped garden has been fully renovated" },
               { label: "Animals", value: "Please don't feed the farm animals. Dogs on a lead near livestock." },
+              { label: "Welcome gift", value: "Estate olive oil for staying guests." },
+              { label: "Merlot", value: "Coming 2029. Not for sale." },
             ]}
           />
         </div>

@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/the-estate",
     "/experiences",
     "/pantry",
+    "/cellar-doors",
     "/events",
     "/the-farm",
     "/contact",

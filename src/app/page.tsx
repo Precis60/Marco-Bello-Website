@@ -37,6 +37,7 @@ const VILLA_FACTS = [
   { label: "Check-in", value: "2:00pm" },
   { label: "Check-out", value: "10:00am" },
   { label: "Pets", value: "Welcome. Please don't feed the farm animals." },
+  { label: "Welcome gift", value: "Estate olive oil" },
   { label: "Pool and spa", value: "Heated to your temperature for the whole stay, included" },
 ];
 
