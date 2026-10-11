@@ -14,8 +14,8 @@ export default function BookingCancelPage() {
             Your payment was not completed and you have not been charged.
             You&apos;re welcome to choose new dates and try again.
           </p>
-          <Link href="/rentals" className="btn btn-primary mt-8 inline-flex">
-            Back to rentals
+          <Link href="/villa-di-marco" className="btn btn-primary mt-8 inline-flex">
+            Back to Villa Di Marco
           </Link>
         </div>
       </Container>
