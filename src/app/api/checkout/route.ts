@@ -5,6 +5,8 @@ import { attachStripeSession, createPendingBooking, getPricesForRange, hasOverla
 import { getProperty } from "@/lib/properties";
 import {
   formatAud,
+  LEVY_EXEMPT_NOTE,
+  LEVY_NOTE,
   normaliseDateKey,
   quoteStay,
   STAY_POLICIES,
@@ -23,11 +25,7 @@ function quoteNotes(quote: StayQuote, petsAllowed: boolean, poolTemperature: str
   if (quote.extraGuests > 0) lines.push(`Extra guests: ${formatAud(quote.extraGuests)}`);
   if (quote.petFee > 0) lines.push(`Pet fee: ${formatAud(quote.petFee)}`);
   lines.push(`Total charged: ${formatAud(quote.total)}`);
-  lines.push(
-    quote.levyApplies
-      ? "Victorian short stay levy: 7.5% applies (stay under 28 days) and is not included in the total charged."
-      : "Victorian short stay levy: this stay is 28 days or longer, so the 7.5% levy does not apply.",
-  );
+  lines.push(quote.levyApplies ? LEVY_NOTE : LEVY_EXEMPT_NOTE);
   if (poolTemperature) lines.push(`Pool temperature request: ${poolTemperature}`);
   if (spaTemperature) lines.push(`Spa temperature request: ${spaTemperature}`);
   if (petsAllowed) {

@@ -4,7 +4,7 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { getSiteUrl, lodgingJsonLd } from "@/lib/site";
+import { absoluteUrl, getSiteUrl, lodgingJsonLd } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = getSiteUrl();
+const homeUrl = absoluteUrl("/");
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Bello Marco Farm",
     locale: "en_AU",
-    url: siteUrl,
+    url: homeUrl,
   },
   twitter: {
     card: "summary_large_image",
@@ -70,7 +71,7 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(lodgingJsonLd(siteUrl)).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(lodgingJsonLd(homeUrl)).replace(/</g, "\\u003c"),
           }}
         />
       </body>

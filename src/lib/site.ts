@@ -28,21 +28,56 @@ export const NAV_LINKS = [
 ] as const;
 
 /**
- * Canonical site origin for metadata, Open Graph and JSON-LD.
- * Set NEXT_PUBLIC_SITE_URL to the production domain (Vercel). Preview
- * deployments fall back to Vercel's production URL, then localhost.
+ * Production origin used when no site URL is configured.
+ * This is the Vercel production host, never a preview or branch URL.
+ */
+export const DEFAULT_PRODUCTION_SITE_URL = "https://marco-bello-website.vercel.app";
+
+/**
+ * Canonical site origin for metadata, sitemap, robots, Open Graph and JSON-LD.
+ *
+ * 1. NEXT_PUBLIC_SITE_URL — set this in Vercel when a custom domain is added.
+ * 2. VERCEL_PROJECT_PRODUCTION_URL — the project's production host.
+ * 3. https://marco-bello-website.vercel.app in production and on Vercel
+ *    preview builds, so those builds never emit localhost or a branch URL.
+ * 4. http://localhost:3000 for local development.
+ *
+ * VERCEL_URL is intentionally unused: it is the current deployment host,
+ * including preview and branch URLs.
  */
 export function getSiteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) return explicit.replace(/\/$/, "");
+  const explicit = normaliseOrigin(process.env.NEXT_PUBLIC_SITE_URL);
+  if (explicit) return explicit;
 
   const production = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
   if (production) {
     const host = production.replace(/^https?:\/\//, "").replace(/\/$/, "");
-    return `https://${host}`;
+    if (host) return `https://${host}`;
+  }
+
+  if (process.env.NODE_ENV === "production" || isVercelDeployment()) {
+    return DEFAULT_PRODUCTION_SITE_URL;
   }
 
   return "http://localhost:3000";
+}
+
+/** Absolute URL on the resolved production origin. */
+export function absoluteUrl(path = "/"): string {
+  const base = getSiteUrl();
+  const normalised = path.startsWith("/") ? path : `/${path}`;
+  return normalised === "/" ? `${base}/` : `${base}${normalised}`;
+}
+
+function normaliseOrigin(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.replace(/\/$/, "");
+}
+
+function isVercelDeployment(): boolean {
+  const env = process.env.VERCEL_ENV;
+  return env === "production" || env === "preview";
 }
 
 export function pageMeta(input: {
@@ -50,14 +85,15 @@ export function pageMeta(input: {
   description: string;
   path: string;
 }): Metadata {
+  const url = absoluteUrl(input.path);
   return {
     title: { absolute: input.title },
     description: input.description,
-    alternates: { canonical: input.path },
+    alternates: { canonical: url },
     openGraph: {
       title: input.title,
       description: input.description,
-      url: input.path,
+      url,
       siteName: BRAND,
       type: "website",
       locale: "en_AU",

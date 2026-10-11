@@ -8,6 +8,7 @@ import { Calendar } from "@/components/Calendar";
 import { assignLocation } from "@/lib/navigate";
 import {
   formatAud,
+  LEVY_EXEMPT_NOTE,
   LEVY_NOTE,
   normaliseDateKey,
   parseISODate,
@@ -279,9 +280,7 @@ export function BookingCalendar({ propertyId, propertyName }: BookingCalendarPro
             </ul>
           )}
           <p className="mt-3 text-xs leading-5 text-muted">
-            {quote.levyApplies
-              ? LEVY_NOTE
-              : "This stay is 28 days or longer, so the Victorian 7.5% short stay levy does not apply."}
+            {quote.levyApplies ? LEVY_NOTE : LEVY_EXEMPT_NOTE}
           </p>
         </div>
       )}
