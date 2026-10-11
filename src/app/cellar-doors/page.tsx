@@ -10,26 +10,105 @@ export const metadata = pageMeta({
   path: "/cellar-doors",
 });
 
-const PLACEHOLDERS = [
+const LOCAL_FAVOURITES = [
   {
-    title: "Cellar door",
-    detail: "Licensed local cellar door. Name, address and link are still to be confirmed.",
+    name: "Scotchmans Hill",
+    town: "Drysdale",
+    description: "Halliday 5-star winery and the closest major cellar door to the farm.",
+    href: "https://www.scotchmans.com.au",
+    delivery: "Contact for delivery",
   },
   {
-    title: "Bottle shop",
-    detail: "Licensed local bottle shop. Name, address and link are still to be confirmed.",
+    name: "Oakdene",
+    town: "Wallington",
+    description: "Halliday 5-star winery, with a restaurant and cellar door.",
+    href: "https://www.oakdene.com.au",
+    delivery: "Contact for delivery",
   },
   {
-    title: "Second cellar door",
-    detail: "A second licensed partner, if we add one. Name, address and link are still to be confirmed.",
+    name: "Banks Road",
+    town: "Marcus Hill",
+    description: "Small family estate. Its own site states a Halliday 5-star rating.",
+    href: "https://banksroad.com.au",
+    delivery: "Contact for delivery",
   },
-];
+  {
+    name: "Jack Rabbit Vineyard",
+    town: "Bellarine",
+    description: "Cellar door and restaurant with bay views.",
+    href: "https://www.jackrabbitvineyard.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Terindah Estate",
+    town: "Bellarine",
+    description: "Boutique cellar door with lunch and private tastings.",
+    href: "https://www.terindahestate.com",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Leura Park Estate",
+    town: "Curlewis",
+    description: "Cellar door a short drive from Drysdale.",
+    href: "https://leuraparkestate.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Basils Farm",
+    town: "Swan Bay",
+    description: "Restaurant and vineyard set in landscaped gardens.",
+    href: "https://www.basilsfarm.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Bellarine Distillery / The Whiskery",
+    town: "Drysdale",
+    description: "Local gin distillery, with tastings at the cellar door.",
+    href: "https://www.bellarinedistillery.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Flying Brick Cider Co",
+    town: "Wallington",
+    description: "Cider house and restaurant.",
+    href: "https://flyingbrickciderco.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Austin's Wines",
+    town: "Sutherlands Creek",
+    description: "Geelong cool-climate cellar door, about 40–45 minutes from Drysdale.",
+    href: "https://austinswines.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Bellarine Estate",
+    town: "Bellarine",
+    description: "Cellar door with a garden setting.",
+    href: "https://bellarineestate.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Noble Rot Wine Store & Bar",
+    town: "Point Lonsdale",
+    description: "Fine wine merchant and bar.",
+    href: "https://noblerotwine.com.au",
+    delivery: "Contact for delivery",
+  },
+  {
+    name: "Barwon Heads Winestore",
+    town: "Barwon Heads",
+    description: "Independent wine store and bar.",
+    href: "https://barwonheadswinestore.com.au",
+    delivery: "Free delivery across the Bellarine and Geelong",
+  },
+] as const;
 
 export default function CellarDoorsPage() {
   return (
     <div className="py-16 sm:py-20">
       <Container>
-        <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted">Licensed retailers</p>
+        <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted">Local favourites</p>
         <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
           Local cellar doors &amp; bottle shops
         </h1>
@@ -47,13 +126,21 @@ export default function CellarDoorsPage() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {PLACEHOLDERS.map((partner) => (
-            <article key={partner.title} className="rounded-2xl border border-dashed border-black/20 bg-surface p-5">
-              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-muted">Placeholder</p>
-              <h2 className="mt-3 text-lg font-semibold">{partner.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">{partner.detail}</p>
-              <p className="mt-4 text-sm font-medium">Link to be confirmed</p>
+        <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {LOCAL_FAVOURITES.map((place) => (
+            <article key={place.name} className="flex flex-col rounded-2xl border border-black/10 bg-surface p-5">
+              <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-muted">{place.town}</p>
+              <h2 className="mt-2 text-lg font-semibold">{place.name}</h2>
+              <p className="mt-2 text-sm leading-6 text-muted">{place.description}</p>
+              <p className="mt-3 text-sm leading-6">{place.delivery}</p>
+              <a
+                href={place.href}
+                className="mt-4 text-sm font-semibold underline underline-offset-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {place.href.replace(/^https?:\/\//, "")}
+              </a>
             </article>
           ))}
         </div>
