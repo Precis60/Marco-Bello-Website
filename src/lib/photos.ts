@@ -19,7 +19,8 @@ export type VillaPhotoGroup =
   | "study"
   | "hallway"
   | "outdoors"
-  | "farm";
+  | "farm"
+  | "views";
 
 export type VillaPhoto = {
   id: string;
@@ -40,6 +41,7 @@ export const VILLA_PHOTO_GROUPS: readonly { id: VillaPhotoGroup; title: string }
   { id: "hallway", title: "Hallway" },
   { id: "outdoors", title: "Outdoors" },
   { id: "farm", title: "The farm" },
+  { id: "views", title: "Views" },
 ];
 
 const photo = (
@@ -268,6 +270,15 @@ export const VILLA_PHOTOS: readonly VillaPhoto[] = [
     1200,
     "farm",
   ),
+  photo(
+    "29",
+    "29-paddock-sunset-golden.jpg",
+    "Golden sunset over the open paddocks at Bello Marco Farm.",
+    "Open paddocks",
+    2048,
+    1152,
+    "views",
+  ),
 ];
 
 export function villaPhoto(id: string): VillaPhoto {
@@ -294,6 +305,9 @@ export const ESTATE_PHOTOS: readonly VillaPhoto[] = ["01", "05", "08", "21"].map
 
 /** Paddock photo. Not a claim about ownership of a herd, or that guests may feed animals. */
 export const FARM_PHOTO = villaPhoto("28");
+
+/** Golden-hour paddock view for The Estate. */
+export const PADDOCK_SUNSET = villaPhoto("29");
 
 export const defaultOgImage = {
   url: VILLA_HERO.src,
