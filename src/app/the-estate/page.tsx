@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
+import { SitePhoto } from "@/components/SitePhoto";
+import { ESTATE_PHOTOS } from "@/lib/photos";
 import { ESTATE_CLEANING, ESTATE_SEASONS, formatAud, FROM_PRICES } from "@/lib/rates";
 import { pageMeta } from "@/lib/site";
 
@@ -29,8 +31,25 @@ export default function EstatePage() {
           and midweek corporate retreats.
         </p>
 
-        <div className="mt-8">
-          <PhotoPlaceholder label="The Estate — both stays, the pool and the farm" aspect="aspect-[16/8]" />
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ESTATE_PHOTOS.map((photo) => (
+            <li key={photo.id}>
+              <figure>
+                <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-black/5">
+                  <SitePhoto
+                    photo={photo}
+                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+                    fill
+                    className="object-cover object-center"
+                  />
+                </span>
+                <figcaption className="mt-2 text-sm text-muted">{photo.caption}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-4">
+          <PhotoPlaceholder label="The Estate — La Stalla, the pool, and the farm" aspect="aspect-[16/8]" />
         </div>
 
         <div className="mt-10">
