@@ -5,7 +5,8 @@ import { Container } from "@/components/Container";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
 import { SitePhoto } from "@/components/SitePhoto";
-import { VILLA_GALLERY, VILLA_HERO } from "@/lib/photos";
+import { SunsetBand } from "@/components/SunsetBand";
+import { BAY_SUNSET, BAY_SUNSET_MOBILE, VILLA_GALLERY, VILLA_HERO } from "@/lib/photos";
 import {
   EARLY_LATE_FEE,
   formatAud,
@@ -54,6 +55,13 @@ export default function VillaPage() {
           />
           <figcaption className="sr-only">{VILLA_HERO.caption}</figcaption>
         </figure>
+
+        <section className="mt-12">
+          <h2 className="text-3xl font-semibold tracking-tight">Sunset over the bay</h2>
+          <div className="mt-6">
+            <SunsetBand desktop={BAY_SUNSET} mobile={BAY_SUNSET_MOBILE} />
+          </div>
+        </section>
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <PhotoPlaceholder label="Pool and spa" aspect="aspect-[4/3]" />
