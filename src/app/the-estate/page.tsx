@@ -4,7 +4,7 @@ import { Container } from "@/components/Container";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
 import { SitePhoto } from "@/components/SitePhoto";
-import { ESTATE_FARM_HERO, ESTATE_PHOTOS, PADDOCK_SUNSET } from "@/lib/photos";
+import { ESTATE_FARM_HERO, ESTATE_PHOTOS, PADDOCK_SUNSET, VIVID_SUNSET } from "@/lib/photos";
 import { ESTATE_CLEANING, ESTATE_SEASONS, formatAud, FROM_PRICES } from "@/lib/rates";
 import { pageMeta } from "@/lib/site";
 
@@ -74,6 +74,18 @@ export default function EstatePage() {
             ]}
           />
         </div>
+
+        <section className="mt-16">
+          <h2 className="text-3xl font-semibold tracking-tight">Sunset over the bay</h2>
+          <figure className="mt-8 overflow-hidden rounded-3xl">
+            <SitePhoto
+              photo={VIVID_SUNSET}
+              sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+              className="h-auto w-full"
+            />
+            <figcaption className="mt-2 text-sm text-muted">{VIVID_SUNSET.caption}</figcaption>
+          </figure>
+        </section>
 
         <section className="mt-16">
           <div className="max-w-2xl">

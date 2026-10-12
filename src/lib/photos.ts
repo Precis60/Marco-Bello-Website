@@ -334,6 +334,51 @@ export const VILLA_PHOTOS: readonly VillaPhoto[] = [
     "farm",
   ),
   photo(
+    "23",
+    "23-sunset-bay-view-paddock.jpg",
+    "Sunset over the bay towards Geelong from Bello Marco Farm, with open paddock in the foreground.",
+    "Sunset over the bay",
+    1600,
+    1200,
+    "views",
+  ),
+  photo(
+    "24",
+    "24-sunset-bay-view-sky.jpg",
+    "Vivid sunset sky over the bay towards Geelong from Bello Marco Farm.",
+    "Vivid sky",
+    1600,
+    1200,
+    "views",
+  ),
+  photo(
+    "25",
+    "25-sunset-bay-portrait.jpg",
+    "Sunset over the bay towards Geelong from Bello Marco Farm, with the paddock in front.",
+    "Paddock and the bay",
+    1200,
+    1600,
+    "views",
+  ),
+  photo(
+    "26",
+    "26-sunset-sun-on-horizon.jpg",
+    "The sun setting on the horizon over the bay towards Geelong from Bello Marco Farm.",
+    "Sun on the horizon",
+    1260,
+    1020,
+    "views",
+  ),
+  photo(
+    "27",
+    "27-sunset-afterglow.jpg",
+    "Afterglow over the bay towards Geelong from Bello Marco Farm.",
+    "Afterglow",
+    1600,
+    1200,
+    "views",
+  ),
+  photo(
     "29",
     "29-paddock-sunset-golden.jpg",
     "Golden sunset over the open paddocks at Bello Marco Farm.",
@@ -377,6 +422,15 @@ export const HOME_FARM_INTRO = villaPhoto("35");
 
 /** Golden-hour paddock view for The Estate. */
 export const PADDOCK_SUNSET = villaPhoto("29");
+
+/** Strongest bay sunset. Desktop frame for the Sunset over the bay band. */
+export const BAY_SUNSET = villaPhoto("23");
+
+/** Portrait of the same bay sunset, used as the mobile frame of the band. */
+export const BAY_SUNSET_MOBILE = villaPhoto("25");
+
+/** Vivid sky sunset on The Estate page. */
+export const VIVID_SUNSET = villaPhoto("24");
 
 export const defaultOgImage = {
   url: VILLA_HERO.src,

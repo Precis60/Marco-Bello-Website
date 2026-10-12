@@ -5,7 +5,15 @@ import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
 import { PhotoStrip } from "@/components/PhotoStrip";
 import { SitePhoto } from "@/components/SitePhoto";
-import { HOME_FARM_INTRO, HOME_VILLA_HIGHLIGHTS, VILLA_HERO, defaultOgImage } from "@/lib/photos";
+import { SunsetBand } from "@/components/SunsetBand";
+import {
+  BAY_SUNSET,
+  BAY_SUNSET_MOBILE,
+  HOME_FARM_INTRO,
+  HOME_VILLA_HIGHLIGHTS,
+  VILLA_HERO,
+  defaultOgImage,
+} from "@/lib/photos";
 import { FROM_PRICES, formatAud, LEVY_NOTE } from "@/lib/rates";
 import { absoluteUrl } from "@/lib/site";
 
@@ -92,6 +100,15 @@ export default function Home() {
             />
             <figcaption className="sr-only">{VILLA_HERO.caption}</figcaption>
           </figure>
+        </Container>
+      </section>
+
+      <section className="pb-4 sm:pb-8">
+        <Container>
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Sunset over the bay</h2>
+          <div className="mt-6">
+            <SunsetBand desktop={BAY_SUNSET} mobile={BAY_SUNSET_MOBILE} />
+          </div>
         </Container>
       </section>
 
