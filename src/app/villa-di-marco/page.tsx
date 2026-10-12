@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { BookingCalendar } from "@/components/BookingCalendar";
 import { Container } from "@/components/Container";
+import { PhotoGallery } from "@/components/PhotoGallery";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
+import { SitePhoto } from "@/components/SitePhoto";
+import { VILLA_GALLERY, VILLA_HERO } from "@/lib/photos";
 import {
   EARLY_LATE_FEE,
   formatAud,
@@ -42,9 +45,19 @@ export default function VillaPage() {
           <Link href="/the-estate" className="btn btn-secondary">Whole property as The Estate</Link>
         </div>
 
-        <div className="mt-10 grid gap-4 lg:grid-cols-2">
-          <PhotoPlaceholder label="Villa Di Marco, the pool and the view" aspect="aspect-[4/3]" />
-          <PhotoPlaceholder label="Bedrooms, bathrooms and the landscaped garden" aspect="aspect-[4/3]" />
+        <figure className="mt-10 overflow-hidden rounded-3xl">
+          <SitePhoto
+            photo={VILLA_HERO}
+            priority
+            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+            className="h-auto w-full"
+          />
+          <figcaption className="sr-only">{VILLA_HERO.caption}</figcaption>
+        </figure>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <PhotoPlaceholder label="Pool and spa" aspect="aspect-[4/3]" />
+          <PhotoPlaceholder label="The house exterior" aspect="aspect-[4/3]" />
         </div>
 
         <div className="mt-12">
@@ -62,6 +75,16 @@ export default function VillaPage() {
             ]}
           />
         </div>
+
+        <section id="gallery" className="mt-16 scroll-mt-24">
+          <h2 className="text-3xl font-semibold tracking-tight">The house, garden, and farm</h2>
+          <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
+            Interim photos of Villa Di Marco. Pool, spa, and exterior photography will follow.
+          </p>
+          <div className="mt-8">
+            <PhotoGallery photos={VILLA_GALLERY} />
+          </div>
+        </section>
 
         <section className="mt-16">
           <h2 className="text-3xl font-semibold tracking-tight">Published rates</h2>

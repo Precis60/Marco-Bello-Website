@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
+import { SitePhoto } from "@/components/SitePhoto";
+import { ESTATE_FARM_HERO, ESTATE_PHOTOS, PADDOCK_SUNSET } from "@/lib/photos";
 import { ESTATE_CLEANING, ESTATE_SEASONS, formatAud, FROM_PRICES } from "@/lib/rates";
 import { pageMeta } from "@/lib/site";
 
@@ -29,8 +31,35 @@ export default function EstatePage() {
           and midweek corporate retreats.
         </p>
 
-        <div className="mt-8">
-          <PhotoPlaceholder label="The Estate — both stays, the pool and the farm" aspect="aspect-[16/8]" />
+        <figure className="mt-8 overflow-hidden rounded-3xl">
+          <SitePhoto
+            photo={ESTATE_FARM_HERO}
+            priority
+            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+            className="h-auto w-full"
+          />
+          <figcaption className="mt-2 text-sm text-muted">{ESTATE_FARM_HERO.caption}</figcaption>
+        </figure>
+
+        <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ESTATE_PHOTOS.map((photo) => (
+            <li key={photo.id}>
+              <figure>
+                <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-black/5">
+                  <SitePhoto
+                    photo={photo}
+                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+                    fill
+                    className="object-cover object-center"
+                  />
+                </span>
+                <figcaption className="mt-2 text-sm text-muted">{photo.caption}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-4">
+          <PhotoPlaceholder label="La Stalla and the pool" aspect="aspect-[16/8]" />
         </div>
 
         <div className="mt-10">
@@ -45,6 +74,23 @@ export default function EstatePage() {
             ]}
           />
         </div>
+
+        <section className="mt-16">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl font-semibold tracking-tight">76 acres of open paddock</h2>
+            <p className="mt-4 text-sm leading-6 text-muted">
+              Villa Di Marco and La Stalla share the same farm. Past the house and the garden, the land is open paddock.
+            </p>
+          </div>
+          <figure className="mt-8 overflow-hidden rounded-3xl">
+            <SitePhoto
+              photo={PADDOCK_SUNSET}
+              sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+              className="h-auto w-full"
+            />
+            <figcaption className="mt-2 text-sm text-muted">{PADDOCK_SUNSET.caption}</figcaption>
+          </figure>
+        </section>
 
         <section className="mt-16">
           <h2 className="text-3xl font-semibold tracking-tight">Published rates</h2>

@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { defaultOgImage } from "@/lib/photos";
 import { absoluteUrl, getSiteUrl, lodgingJsonLd } from "@/lib/site";
 
 const geistSans = Geist({
@@ -44,12 +45,14 @@ export const metadata: Metadata = {
     siteName: "Bello Marco Farm",
     locale: "en_AU",
     url: homeUrl,
+    images: [defaultOgImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "Bello Marco Farm | Luxury farm stay, Drysdale",
     description:
       "Drysdale accommodation with a heated pool and spa on a 76-acre Bellarine farm.",
+    images: [defaultOgImage.url],
   },
 };
 

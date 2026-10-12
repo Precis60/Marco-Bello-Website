@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { defaultOgImage } from "@/lib/photos";
+
 export const BRAND = "Bello Marco Farm";
 
 export const PHONE_DISPLAY = "0413 729 663";
@@ -97,11 +99,13 @@ export function pageMeta(input: {
       siteName: BRAND,
       type: "website",
       locale: "en_AU",
+      images: [defaultOgImage],
     },
     twitter: {
       card: "summary_large_image",
       title: input.title,
       description: input.description,
+      images: [defaultOgImage.url],
     },
   };
 }

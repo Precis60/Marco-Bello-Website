@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
+import { PhotoStrip } from "@/components/PhotoStrip";
+import { SitePhoto } from "@/components/SitePhoto";
+import { HOME_FARM_INTRO, HOME_VILLA_HIGHLIGHTS, VILLA_HERO, defaultOgImage } from "@/lib/photos";
 import { FROM_PRICES, formatAud, LEVY_NOTE } from "@/lib/rates";
 import { absoluteUrl } from "@/lib/site";
 
@@ -29,6 +32,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Bello Marco Farm",
     locale: "en_AU",
+    images: [defaultOgImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Bellarine luxury farm stay with heated pool and spa | Bello Marco Farm",
+    description:
+      "Villa Di Marco on a 76-acre farm at Drysdale. Your pool, your temperature — solar-powered heating, all year, included.",
+    images: [defaultOgImage.url],
   },
 };
 
@@ -49,34 +60,38 @@ export default function Home() {
     <div>
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(1000px_520px_at_20%_0%,rgba(31,58,46,0.14),transparent_60%),radial-gradient(800px_420px_at_90%_20%,rgba(176,141,87,0.16),transparent_55%)]" />
-        <Container className="relative py-16 sm:py-24">
-          <div className="grid items-end gap-12 lg:grid-cols-12">
-            <div className="lg:col-span-7">
-              <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted">
-                Bello Marco Farm · Drysdale, Bellarine Peninsula
-              </p>
-              <h1 className="mt-5 text-5xl font-semibold tracking-tight sm:text-6xl">
-                Your pool, your temperature
-              </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-muted">
-                Villa Di Marco is a luxury farm stay on Murradoc Hill, the highest point on the Bellarine,
-                with bay and Melbourne skyline views across 76 acres. The pool and spa use all-electric,
-                solar-powered heating, set to the temperature you choose for the whole stay, all year, included.
-              </p>
-              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-                <Link href="/villa-di-marco#availability" className="btn btn-primary">
-                  Book Villa Di Marco
-                </Link>
-                <Link href="/villa-di-marco#availability" className="btn btn-secondary">
-                  Check availability
-                </Link>
-              </div>
-              <p className="mt-4 text-sm text-muted">From {formatAud(FROM_PRICES.villa)} / night in winter.</p>
+        <Container className="relative pt-16 pb-16 sm:pt-24 sm:pb-24">
+          <div className="max-w-3xl">
+            <p className="text-xs font-semibold tracking-[0.22em] uppercase text-muted">
+              Bello Marco Farm · Drysdale, Bellarine Peninsula
+            </p>
+            <h1 className="mt-5 text-5xl font-semibold tracking-tight sm:text-6xl">
+              Your pool, your temperature
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-muted">
+              Villa Di Marco is a luxury farm stay on Murradoc Hill, the highest point on the Bellarine,
+              with bay and Melbourne skyline views across 76 acres. The pool and spa use all-electric,
+              solar-powered heating, set to the temperature you choose for the whole stay, all year, included.
+            </p>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+              <Link href="/villa-di-marco#availability" className="btn btn-primary">
+                Book Villa Di Marco
+              </Link>
+              <Link href="/villa-di-marco#availability" className="btn btn-secondary">
+                Check availability
+              </Link>
             </div>
-            <div className="lg:col-span-5">
-              <PhotoPlaceholder label="Pool and spa, with the view from Murradoc Hill" aspect="aspect-[4/5]" />
-            </div>
+            <p className="mt-4 text-sm text-muted">From {formatAud(FROM_PRICES.villa)} / night in winter.</p>
           </div>
+          <figure className="mt-10 overflow-hidden rounded-3xl">
+            <SitePhoto
+              photo={VILLA_HERO}
+              priority
+              sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+              className="h-auto w-full"
+            />
+            <figcaption className="sr-only">{VILLA_HERO.caption}</figcaption>
+          </figure>
         </Container>
       </section>
 
@@ -94,8 +109,10 @@ export default function Home() {
           <div className="mt-8">
             <FactGrid facts={VILLA_FACTS} />
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <PhotoPlaceholder label="Villa Di Marco living rooms and garden" />
+          <div className="mt-10">
+            <PhotoStrip photos={HOME_VILLA_HIGHLIGHTS} />
+          </div>
+          <div className="mt-8">
             <PhotoPlaceholder label="Bay and Melbourne skyline from the hill" />
           </div>
         </Container>
@@ -116,6 +133,9 @@ export default function Home() {
               </p>
               <p className="mt-4">Swim in July. The heat is solar-powered heating, included with Villa Di Marco and with The Estate.</p>
             </div>
+          </div>
+          <div className="mt-4">
+            <PhotoPlaceholder label="Pool and spa, with the view from Murradoc Hill" aspect="aspect-[16/8]" />
           </div>
         </Container>
       </section>
@@ -142,17 +162,30 @@ export default function Home() {
                 title: "The Estate",
                 price: `From ${formatAud(FROM_PRICES.estate)} / night`,
                 text: "Both stays together, for up to 16 guests. Pool and spa for the whole group.",
+                photo: HOME_FARM_INTRO,
               },
             ].map((stay) => (
               <Link
                 key={stay.href}
                 href={stay.href}
-                className="rounded-3xl border border-black/10 bg-surface p-6 transition hover:border-black/20"
+                className="overflow-hidden rounded-3xl border border-black/10 bg-surface transition hover:border-black/20"
               >
-                <div className="text-xs font-semibold tracking-[0.16em] uppercase text-muted">{stay.price}</div>
-                <h3 className="mt-3 text-xl font-semibold tracking-tight">{stay.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted">{stay.text}</p>
-                <div className="mt-6 text-sm font-semibold">View stay →</div>
+                {"photo" in stay && stay.photo ? (
+                  <span className="relative block aspect-[3/4] overflow-hidden bg-black/5">
+                    <SitePhoto
+                      photo={stay.photo}
+                      sizes="(min-width: 1024px) 360px, 100vw"
+                      fill
+                      className="object-cover object-[center_30%]"
+                    />
+                  </span>
+                ) : null}
+                <div className="p-6">
+                  <div className="text-xs font-semibold tracking-[0.16em] uppercase text-muted">{stay.price}</div>
+                  <h3 className="mt-3 text-xl font-semibold tracking-tight">{stay.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted">{stay.text}</p>
+                  <div className="mt-6 text-sm font-semibold">View stay →</div>
+                </div>
               </Link>
             ))}
           </div>
