@@ -4,6 +4,16 @@ import type { InvoiceItem } from "./invoices";
 
 let sqlClient: ReturnType<typeof postgres> | null = null;
 
+function databaseSsl(connectionString: string): "require" | false {
+  try {
+    const host = new URL(connectionString).hostname;
+    if (host === "localhost" || host === "127.0.0.1") return false;
+  } catch {
+    // Keep the hosted default when the connection string cannot be parsed.
+  }
+  return "require";
+}
+
 function getSql() {
   if (!sqlClient) {
     const connectionString = process.env.DATABASE_URL;
@@ -13,7 +23,7 @@ function getSql() {
       );
     }
     sqlClient = postgres(connectionString, {
-      ssl: "require",
+      ssl: databaseSsl(connectionString),
       // Required when connecting through a pooler in transaction mode (e.g.
       // Supabase's pooled connection string on port 6543). Harmless otherwise.
       prepare: false,
