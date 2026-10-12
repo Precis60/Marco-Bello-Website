@@ -5,7 +5,7 @@ import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
 import { PhotoStrip } from "@/components/PhotoStrip";
 import { SitePhoto } from "@/components/SitePhoto";
-import { FARM_PHOTO, HOME_VILLA_HIGHLIGHTS, VILLA_HERO, defaultOgImage } from "@/lib/photos";
+import { HOME_FARM_INTRO, HOME_VILLA_HIGHLIGHTS, VILLA_HERO, defaultOgImage } from "@/lib/photos";
 import { FROM_PRICES, formatAud, LEVY_NOTE } from "@/lib/rates";
 import { absoluteUrl } from "@/lib/site";
 
@@ -162,7 +162,7 @@ export default function Home() {
                 title: "The Estate",
                 price: `From ${formatAud(FROM_PRICES.estate)} / night`,
                 text: "Both stays together, for up to 16 guests. Pool and spa for the whole group.",
-                photo: FARM_PHOTO,
+                photo: HOME_FARM_INTRO,
               },
             ].map((stay) => (
               <Link
@@ -171,11 +171,14 @@ export default function Home() {
                 className="overflow-hidden rounded-3xl border border-black/10 bg-surface transition hover:border-black/20"
               >
                 {"photo" in stay && stay.photo ? (
-                  <SitePhoto
-                    photo={stay.photo}
-                    sizes="(min-width: 1024px) 360px, 100vw"
-                    className="h-auto w-full"
-                  />
+                  <span className="relative block aspect-[3/4] overflow-hidden bg-black/5">
+                    <SitePhoto
+                      photo={stay.photo}
+                      sizes="(min-width: 1024px) 360px, 100vw"
+                      fill
+                      className="object-cover object-[center_30%]"
+                    />
+                  </span>
                 ) : null}
                 <div className="p-6">
                   <div className="text-xs font-semibold tracking-[0.16em] uppercase text-muted">{stay.price}</div>

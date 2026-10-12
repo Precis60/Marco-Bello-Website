@@ -271,6 +271,69 @@ export const VILLA_PHOTOS: readonly VillaPhoto[] = [
     "farm",
   ),
   photo(
+    "31",
+    "31-farm-herd-bay-view.jpg",
+    "Black-and-white calves in a green paddock, with the bay on the horizon.",
+    "Herd and bay",
+    1200,
+    1600,
+    "farm",
+  ),
+  photo(
+    "32",
+    "32-farm-curious-calf-bay.jpg",
+    "A calf at a wire fence, with the bay behind.",
+    "Calf at the fence",
+    1200,
+    1600,
+    "farm",
+  ),
+  photo(
+    "33",
+    "33-farm-grazing-cypress-row.jpg",
+    "Cattle grazing beside a row of cypress trees, with the bay beyond.",
+    "Cypress row",
+    1120,
+    1200,
+    "farm",
+  ),
+  photo(
+    "34",
+    "34-farm-herd-bay-landscape.jpg",
+    "Friesian calves grazing in a green paddock, with the bay on the horizon.",
+    "Grazing and the bay",
+    1600,
+    1200,
+    "farm",
+  ),
+  photo(
+    "35",
+    "35-farm-calf-clover-closeup.jpg",
+    "A calf close up, with clover in its mouth.",
+    "Calf with clover",
+    1200,
+    1600,
+    "farm",
+  ),
+  photo(
+    "36",
+    "36-farm-cows-at-fence.jpg",
+    "Two cows standing by a timber fence in a green paddock.",
+    "Two cows",
+    1200,
+    1600,
+    "farm",
+  ),
+  photo(
+    "37",
+    "37-farm-calves-gate-paddock.jpg",
+    "Calves at a paddock gate, with open pasture and a wide sky.",
+    "Gate and sky",
+    1200,
+    1600,
+    "farm",
+  ),
+  photo(
     "29",
     "29-paddock-sunset-golden.jpg",
     "Golden sunset over the open paddocks at Bello Marco Farm.",
@@ -300,11 +363,17 @@ export const HOME_VILLA_HIGHLIGHTS: readonly VillaPhoto[] = ["01", "02", "05", "
   villaPhoto,
 );
 
-/** The Estate page interiors and garden. La Stalla and the pool stay as placeholders. */
-export const ESTATE_PHOTOS: readonly VillaPhoto[] = ["01", "05", "08", "21"].map(villaPhoto);
+/** The Estate page. 28 stays as a secondary farm photo. La Stalla and the pool stay as placeholders. */
+export const ESTATE_PHOTOS: readonly VillaPhoto[] = ["28", "01", "05", "08", "21"].map(villaPhoto);
 
-/** Paddock photo. Not a claim about ownership of a herd, or that guests may feed animals. */
+/** Lead farm photo on The Farm page. Not a claim that guests may feed animals. */
 export const FARM_PHOTO = villaPhoto("28");
+
+/** Strongest bay-and-cattle frame. The Estate farm hero. */
+export const ESTATE_FARM_HERO = villaPhoto("34");
+
+/** Close-up used where the farm is introduced on the home page. */
+export const HOME_FARM_INTRO = villaPhoto("35");
 
 /** Golden-hour paddock view for The Estate. */
 export const PADDOCK_SUNSET = villaPhoto("29");
