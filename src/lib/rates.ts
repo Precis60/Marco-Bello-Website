@@ -21,7 +21,10 @@ export const FROM_PRICES = {
 } as const;
 
 export const LEVY_NOTE =
-  "The Victorian 7.5% short stay levy applies to stays under 28 days and is not included in the total.";
+  "Prices include the Victorian 7.5% short stay levy for stays under 28 days.";
+
+export const LEVY_EXEMPT_NOTE =
+  "This stay is 28 days or longer, so the Victorian 7.5% short stay levy does not apply.";
 
 export interface StayPolicy {
   id: typeof VILLA_ID | typeof STALLA_ID;

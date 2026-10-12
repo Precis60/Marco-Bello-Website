@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Container } from "@/components/Container";
+import { LEVY_NOTE } from "@/lib/rates";
 import { ADDRESS_LINE, BRAND, EMAIL, NAV_LINKS, PHONE_DISPLAY, PHONE_TEL } from "@/lib/site";
 
 export function SiteFooter() {
@@ -57,7 +58,7 @@ export function SiteFooter() {
         <div className="mt-10 space-y-2 border-t border-black/10 pt-6 text-xs leading-5 text-muted">
           <div>© {new Date().getFullYear()} {BRAND}. All rights reserved.</div>
           <p>
-            The Victorian 7.5% short stay levy applies to stays under 28 days. Check-in is 2:00pm and check-out is 10:00am.
+            {LEVY_NOTE} Check-in is 2:00pm and check-out is 10:00am.
             Pets are welcome in Villa Di Marco — please don&apos;t feed the farm animals.
           </p>
         </div>

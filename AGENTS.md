@@ -15,6 +15,16 @@ Deploy this project on **Vercel** instead:
    (Settings > Environment Variables), for both Production and Preview.
 4. Push to `main` and Vercel will deploy automatically on every push.
 
+### Public site URL
+
+Canonical links, `sitemap.xml`, `robots.txt`, Open Graph and JSON-LD all use
+`getSiteUrl()` in `src/lib/site.ts`. When a custom domain is added, set
+`NEXT_PUBLIC_SITE_URL` in Vercel (Production and Preview) to that origin, for
+example `https://bellomarco.com.au`. Do not point it at a preview or branch
+URL. If it is unset, the app uses `VERCEL_PROJECT_PRODUCTION_URL`, then
+`https://marco-bello-website.vercel.app` in production. Local development
+uses `http://localhost:3000`.
+
 ## Booking system setup
 
 The booking calendars on `/rentals` (The Main House - Villa Di Marco and Tiny

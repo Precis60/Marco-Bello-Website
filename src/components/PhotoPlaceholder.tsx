@@ -1,3 +1,5 @@
+import { LEVY_NOTE } from "@/lib/rates";
+
 export function PhotoPlaceholder({
   label,
   aspect = "aspect-[16/10]",
@@ -78,10 +80,5 @@ export function RateTable({
 }
 
 export function LevyNote() {
-  return (
-    <p className="text-sm leading-6 text-muted">
-      The Victorian 7.5% short stay levy applies to stays under 28 days. It is
-      not included in the prices or totals on this page.
-    </p>
-  );
+  return <p className="text-sm leading-6 text-muted">{LEVY_NOTE}</p>;
 }

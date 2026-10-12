@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Container } from "@/components/Container";
+import { LEVY_NOTE } from "@/lib/rates";
 
 export default function BookingSuccessPage() {
   return (
@@ -13,8 +14,7 @@ export default function BookingSuccessPage() {
           <p className="mt-4 text-base leading-7 text-muted">
             Thank you. Your payment was successful and your stay is booked.
             A confirmation will be sent to your email. Pool and spa temperature
-            requests are confirmed before you arrive. The Victorian 7.5% short
-            stay levy, if it applies, is not part of the amount you just paid.
+            requests are confirmed before you arrive. {LEVY_NOTE}
           </p>
           <Link href="/villa-di-marco" className="btn btn-primary mt-8 inline-flex">
             Back to Villa Di Marco

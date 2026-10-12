@@ -1,9 +1,8 @@
 import type { MetadataRoute } from "next";
 
-import { getSiteUrl } from "@/lib/site";
+import { absoluteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const siteUrl = getSiteUrl();
   const paths = [
     "/",
     "/villa-di-marco",
@@ -18,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   return paths.map((path) => ({
-    url: `${siteUrl}${path}`,
+    url: absoluteUrl(path),
     changeFrequency: path === "/" ? "weekly" : "monthly",
     priority: path === "/" || path === "/villa-di-marco" ? 1 : 0.7,
   }));

@@ -3,7 +3,8 @@ import Link from "next/link";
 
 import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
-import { FROM_PRICES, formatAud } from "@/lib/rates";
+import { FROM_PRICES, formatAud, LEVY_NOTE } from "@/lib/rates";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
@@ -19,10 +20,12 @@ export const metadata: Metadata = {
     "Bellarine Peninsula farm stay",
     "Murradoc Hill",
   ],
+  alternates: { canonical: absoluteUrl("/") },
   openGraph: {
     title: "Bellarine luxury farm stay with heated pool and spa | Bello Marco Farm",
     description:
       "Villa Di Marco on a 76-acre farm at Drysdale. Your pool, your temperature — solar-powered heating, all year, included.",
+    url: absoluteUrl("/"),
     type: "website",
     siteName: "Bello Marco Farm",
     locale: "en_AU",
@@ -153,6 +156,7 @@ export default function Home() {
               </Link>
             ))}
           </div>
+          <p className="mt-6 max-w-2xl text-sm leading-6 text-muted">{LEVY_NOTE}</p>
         </Container>
       </section>
     </div>
