@@ -4,6 +4,16 @@ import type { InvoiceItem } from "./invoices";
 
 let sqlClient: ReturnType<typeof postgres> | null = null;
 
+function databaseSsl(connectionString: string): "require" | false {
+  try {
+    const host = new URL(connectionString).hostname;
+    if (host === "localhost" || host === "127.0.0.1") return false;
+  } catch {
+    // Keep the hosted default when the connection string cannot be parsed.
+  }
+  return "require";
+}
+
 function getSql() {
   if (!sqlClient) {
     const connectionString = process.env.DATABASE_URL;
@@ -13,7 +23,7 @@ function getSql() {
       );
     }
     sqlClient = postgres(connectionString, {
-      ssl: "require",
+      ssl: databaseSsl(connectionString),
       // Required when connecting through a pooler in transaction mode (e.g.
       // Supabase's pooled connection string on port 6543). Harmless otherwise.
       prepare: false,
@@ -64,6 +74,14 @@ async function ensureSchema() {
           ADD COLUMN IF NOT EXISTS check_in_time TEXT,
           ADD COLUMN IF NOT EXISTS check_out_time TEXT,
           ADD COLUMN IF NOT EXISTS special_requests TEXT
+      `;
+
+      // The original bookings table required guest_name and guest_email.
+      // CREATE TABLE IF NOT EXISTS does not relax that on the live database.
+      await sql`
+        ALTER TABLE bookings
+          ALTER COLUMN guest_name DROP NOT NULL,
+          ALTER COLUMN guest_email DROP NOT NULL
       `;
 
       await sql`
@@ -291,7 +309,7 @@ export async function hasOverlapExcluding(
   return hasOverlapQuery(sql, propertyId, startDate, endDate, excludeBookingId);
 }
 
-export async function createPendingBooking(params: {
+export interface PendingBookingInput {
   propertyId: string;
   startDate: string;
   endDate: string;
@@ -304,14 +322,35 @@ export async function createPendingBooking(params: {
   checkInTime?: string;
   checkOutTime?: string;
   specialRequests?: string;
-}): Promise<number> {
-  await ensureSchema();
-  const sql = getSql();
+}
+
+/** Names written to the original NOT NULL guest_name and guest_email columns. */
+export function legacyGuestFields(firstName: string, lastName: string, email: string) {
+  const guestName = `${firstName} ${lastName}`.replace(/\s+/g, " ").trim();
+  const guestEmail = email.trim();
+  if (!guestName || !guestEmail) {
+    throw new Error("A guest name and email are required to save a booking.");
+  }
+  return { guestName, guestEmail };
+}
+
+function blankToNull(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+export async function insertPendingBooking(
+  sql: postgres.Sql,
+  params: PendingBookingInput,
+): Promise<number> {
+  const { guestName, guestEmail } = legacyGuestFields(params.firstName, params.lastName, params.email);
   const rows = await sql`
     INSERT INTO bookings (
       property_id,
       start_date,
       end_date,
+      guest_name,
+      guest_email,
       first_name,
       last_name,
       email,
@@ -327,20 +366,34 @@ export async function createPendingBooking(params: {
       ${params.propertyId},
       ${params.startDate},
       ${params.endDate},
+      ${guestName},
+      ${guestEmail},
       ${params.firstName},
       ${params.lastName},
       ${params.email},
       ${params.phone},
       ${params.totalGuests},
-      ${params.childrenAges ?? null},
-      ${params.checkInTime ?? null},
-      ${params.checkOutTime ?? null},
-      ${params.specialRequests ?? null},
+      ${blankToNull(params.childrenAges)},
+      ${blankToNull(params.checkInTime)},
+      ${blankToNull(params.checkOutTime)},
+      ${blankToNull(params.specialRequests)},
       'pending'
     )
     RETURNING id
   `;
   return (rows[0] as { id: number }).id;
+}
+
+export async function createPendingBooking(params: PendingBookingInput): Promise<number> {
+  await ensureSchema();
+  return insertPendingBooking(getSql(), params);
+}
+
+/** Drops a checkout that never reached Stripe, so the dates are not held for 30 minutes. */
+export async function deletePendingBooking(bookingId: number): Promise<void> {
+  await ensureSchema();
+  const sql = getSql();
+  await sql`DELETE FROM bookings WHERE id = ${bookingId} AND status = 'pending'`;
 }
 
 export async function attachStripeSession(

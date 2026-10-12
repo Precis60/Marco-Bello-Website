@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { type DateRange, type Matcher } from "react-day-picker";
 
 import { Calendar } from "@/components/Calendar";
+import { TimeSlotSelect } from "@/components/TimeSlotSelect";
 import { assignLocation } from "@/lib/navigate";
 import {
   formatAud,
@@ -16,6 +17,7 @@ import {
   STAY_POLICIES,
   type StayQuote,
 } from "@/lib/rates";
+import { CHECK_IN_SLOTS, CHECK_OUT_SLOTS, STANDARD_CHECK_IN, STANDARD_CHECK_OUT } from "@/lib/stayTimes";
 
 interface BookedRange {
   start_date: string;
@@ -44,8 +46,8 @@ export function BookingCalendar({ propertyId, propertyName }: BookingCalendarPro
   const [pets, setPets] = useState(0);
   const [poolTemperature, setPoolTemperature] = useState("");
   const [spaTemperature, setSpaTemperature] = useState("");
-  const [checkInTime, setCheckInTime] = useState("");
-  const [checkOutTime, setCheckOutTime] = useState("");
+  const [checkInTime, setCheckInTime] = useState(STANDARD_CHECK_IN);
+  const [checkOutTime, setCheckOutTime] = useState(STANDARD_CHECK_OUT);
   const [specialRequests, setSpecialRequests] = useState("");
 
   const [loadingPrices, setLoadingPrices] = useState(false);
@@ -402,15 +404,27 @@ export function BookingCalendar({ propertyId, propertyName }: BookingCalendarPro
           <label htmlFor={`${propertyId}-checkin`} className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
             Requested check-in time
           </label>
-          <input id={`${propertyId}-checkin`} className="input" type="time" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)} />
+          <TimeSlotSelect
+            id={`${propertyId}-checkin`}
+            value={checkInTime}
+            onChange={setCheckInTime}
+            slots={CHECK_IN_SLOTS}
+            describedBy={`${propertyId}-time-note`}
+          />
         </div>
         <div>
           <label htmlFor={`${propertyId}-checkout`} className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">
             Requested check-out time
           </label>
-          <input id={`${propertyId}-checkout`} className="input" type="time" value={checkOutTime} onChange={(e) => setCheckOutTime(e.target.value)} />
+          <TimeSlotSelect
+            id={`${propertyId}-checkout`}
+            value={checkOutTime}
+            onChange={setCheckOutTime}
+            slots={CHECK_OUT_SLOTS}
+            describedBy={`${propertyId}-time-note`}
+          />
         </div>
-        <p className="text-xs leading-5 text-muted sm:col-span-2">
+        <p id={`${propertyId}-time-note`} className="text-xs leading-5 text-muted sm:col-span-2">
           Standard times are 2:00pm check-in and 10:00am check-out. Early check-in or late check-out is $150 each, only when there is no same-day turnover, and is confirmed separately.
         </p>
         <div className="sm:col-span-2">
@@ -427,7 +441,11 @@ export function BookingCalendar({ propertyId, propertyName }: BookingCalendarPro
           />
         </div>
         <div className="sm:col-span-2">
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
         </div>
         <div className="sm:col-span-2">
           <button
