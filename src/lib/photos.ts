@@ -7,7 +7,8 @@
  * the default Open Graph image all read from this file.
  *
  * These are the owner's phone photos. Pool, spa, the house exterior,
- * La Stalla, and the farm stay as placeholders until they are photographed.
+ * the view from the hill, and La Stalla stay as placeholders until they
+ * are photographed.
  */
 
 export type VillaPhotoGroup =
@@ -17,7 +18,8 @@ export type VillaPhotoGroup =
   | "bathrooms"
   | "study"
   | "hallway"
-  | "outdoors";
+  | "outdoors"
+  | "farm";
 
 export type VillaPhoto = {
   id: string;
@@ -37,6 +39,7 @@ export const VILLA_PHOTO_GROUPS: readonly { id: VillaPhotoGroup; title: string }
   { id: "study", title: "Study" },
   { id: "hallway", title: "Hallway" },
   { id: "outdoors", title: "Outdoors" },
+  { id: "farm", title: "The farm" },
 ];
 
 const photo = (
@@ -256,6 +259,15 @@ export const VILLA_PHOTOS: readonly VillaPhoto[] = [
     780,
     "outdoors",
   ),
+  photo(
+    "28",
+    "28-farm-calves-at-gate.jpg",
+    "Young calves at the paddock gate on Bello Marco Farm, with green pasture and a young vineyard behind.",
+    "Calves at the gate",
+    1600,
+    1200,
+    "farm",
+  ),
 ];
 
 export function villaPhoto(id: string): VillaPhoto {
@@ -277,8 +289,11 @@ export const HOME_VILLA_HIGHLIGHTS: readonly VillaPhoto[] = ["01", "02", "05", "
   villaPhoto,
 );
 
-/** The Estate page. Pool, La Stalla, and the farm stay as placeholders. */
+/** The Estate page interiors and garden. La Stalla and the pool stay as placeholders. */
 export const ESTATE_PHOTOS: readonly VillaPhoto[] = ["01", "05", "08", "21"].map(villaPhoto);
+
+/** Paddock photo. Not a claim about ownership of a herd, or that guests may feed animals. */
+export const FARM_PHOTO = villaPhoto("28");
 
 export const defaultOgImage = {
   url: VILLA_HERO.src,

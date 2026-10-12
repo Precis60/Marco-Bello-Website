@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
+import { SitePhoto } from "@/components/SitePhoto";
+import { FARM_PHOTO } from "@/lib/photos";
 import { pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta({
@@ -23,7 +25,17 @@ export default function FarmPage() {
           is about 25 minutes away, and Melbourne about an hour and twenty.
         </p>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+        <figure className="mt-8 overflow-hidden rounded-3xl">
+          <SitePhoto
+            photo={FARM_PHOTO}
+            priority
+            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+            className="h-auto w-full"
+          />
+          <figcaption className="mt-2 text-sm text-muted">{FARM_PHOTO.caption}</figcaption>
+        </figure>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <PhotoPlaceholder label="The 76-acre farm from the hill" aspect="aspect-[4/3]" />
           <PhotoPlaceholder label="The landscaped garden" aspect="aspect-[4/3]" />
         </div>
@@ -63,9 +75,6 @@ export default function FarmPage() {
           </p>
         </div>
 
-        <div className="mt-8">
-          <PhotoPlaceholder label="Paddocks and farm animals — photography still to be taken" />
-        </div>
       </Container>
     </div>
   );

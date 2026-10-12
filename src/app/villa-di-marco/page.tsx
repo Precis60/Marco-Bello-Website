@@ -77,7 +77,7 @@ export default function VillaPage() {
         </div>
 
         <section id="gallery" className="mt-16 scroll-mt-24">
-          <h2 className="text-3xl font-semibold tracking-tight">The house and garden</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">The house, garden, and farm</h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
             Interim photos of Villa Di Marco. Pool, spa, and exterior photography will follow.
           </p>

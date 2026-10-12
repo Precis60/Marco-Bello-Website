@@ -4,7 +4,7 @@ import { Container } from "@/components/Container";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
 import { SitePhoto } from "@/components/SitePhoto";
-import { ESTATE_PHOTOS } from "@/lib/photos";
+import { ESTATE_PHOTOS, FARM_PHOTO } from "@/lib/photos";
 import { ESTATE_CLEANING, ESTATE_SEASONS, formatAud, FROM_PRICES } from "@/lib/rates";
 import { pageMeta } from "@/lib/site";
 
@@ -31,6 +31,16 @@ export default function EstatePage() {
           and midweek corporate retreats.
         </p>
 
+        <figure className="mt-8 overflow-hidden rounded-3xl">
+          <SitePhoto
+            photo={FARM_PHOTO}
+            priority
+            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
+            className="h-auto w-full"
+          />
+          <figcaption className="mt-2 text-sm text-muted">{FARM_PHOTO.caption}</figcaption>
+        </figure>
+
         <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {ESTATE_PHOTOS.map((photo) => (
             <li key={photo.id}>
@@ -49,7 +59,7 @@ export default function EstatePage() {
           ))}
         </ul>
         <div className="mt-4">
-          <PhotoPlaceholder label="The Estate — La Stalla, the pool, and the farm" aspect="aspect-[16/8]" />
+          <PhotoPlaceholder label="La Stalla and the pool" aspect="aspect-[16/8]" />
         </div>
 
         <div className="mt-10">

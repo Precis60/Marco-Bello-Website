@@ -5,7 +5,7 @@ import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
 import { PhotoStrip } from "@/components/PhotoStrip";
 import { SitePhoto } from "@/components/SitePhoto";
-import { HOME_VILLA_HIGHLIGHTS, VILLA_HERO, defaultOgImage } from "@/lib/photos";
+import { FARM_PHOTO, HOME_VILLA_HIGHLIGHTS, VILLA_HERO, defaultOgImage } from "@/lib/photos";
 import { FROM_PRICES, formatAud, LEVY_NOTE } from "@/lib/rates";
 import { absoluteUrl } from "@/lib/site";
 
@@ -162,17 +162,27 @@ export default function Home() {
                 title: "The Estate",
                 price: `From ${formatAud(FROM_PRICES.estate)} / night`,
                 text: "Both stays together, for up to 16 guests. Pool and spa for the whole group.",
+                photo: FARM_PHOTO,
               },
             ].map((stay) => (
               <Link
                 key={stay.href}
                 href={stay.href}
-                className="rounded-3xl border border-black/10 bg-surface p-6 transition hover:border-black/20"
+                className="overflow-hidden rounded-3xl border border-black/10 bg-surface transition hover:border-black/20"
               >
-                <div className="text-xs font-semibold tracking-[0.16em] uppercase text-muted">{stay.price}</div>
-                <h3 className="mt-3 text-xl font-semibold tracking-tight">{stay.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-muted">{stay.text}</p>
-                <div className="mt-6 text-sm font-semibold">View stay →</div>
+                {"photo" in stay && stay.photo ? (
+                  <SitePhoto
+                    photo={stay.photo}
+                    sizes="(min-width: 1024px) 360px, 100vw"
+                    className="h-auto w-full"
+                  />
+                ) : null}
+                <div className="p-6">
+                  <div className="text-xs font-semibold tracking-[0.16em] uppercase text-muted">{stay.price}</div>
+                  <h3 className="mt-3 text-xl font-semibold tracking-tight">{stay.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted">{stay.text}</p>
+                  <div className="mt-6 text-sm font-semibold">View stay →</div>
+                </div>
               </Link>
             ))}
           </div>
