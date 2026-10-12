@@ -57,7 +57,7 @@ export default function VillaPage() {
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
           <PhotoPlaceholder label="Pool and spa" aspect="aspect-[4/3]" />
-          <PhotoPlaceholder label="The landscaped garden and the exterior" aspect="aspect-[4/3]" />
+          <PhotoPlaceholder label="The house exterior" aspect="aspect-[4/3]" />
         </div>
 
         <div className="mt-12">
@@ -77,9 +77,9 @@ export default function VillaPage() {
         </div>
 
         <section id="gallery" className="mt-16 scroll-mt-24">
-          <h2 className="text-3xl font-semibold tracking-tight">Inside the house</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">The house and garden</h2>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
-            Interim photos of Villa Di Marco. Pool, spa, garden, and exterior photography will follow.
+            Interim photos of Villa Di Marco. Pool, spa, and exterior photography will follow.
           </p>
           <div className="mt-8">
             <PhotoGallery photos={VILLA_GALLERY} />

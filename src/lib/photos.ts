@@ -6,9 +6,8 @@
  * (src, alt, caption, width, height). Home, Villa Di Marco, The Estate, and
  * the default Open Graph image all read from this file.
  *
- * These are the owner's phone photos of the house. Pool, spa, exterior,
- * garden, La Stalla, and the farm are not in this list — those stay as
- * placeholders until they are photographed.
+ * These are the owner's phone photos. Pool, spa, the house exterior,
+ * La Stalla, and the farm stay as placeholders until they are photographed.
  */
 
 export type VillaPhotoGroup =
@@ -17,7 +16,8 @@ export type VillaPhotoGroup =
   | "bedrooms"
   | "bathrooms"
   | "study"
-  | "hallway";
+  | "hallway"
+  | "outdoors";
 
 export type VillaPhoto = {
   id: string;
@@ -36,6 +36,7 @@ export const VILLA_PHOTO_GROUPS: readonly { id: VillaPhotoGroup; title: string }
   { id: "bathrooms", title: "Bathrooms" },
   { id: "study", title: "Study" },
   { id: "hallway", title: "Hallway" },
+  { id: "outdoors", title: "Outdoors" },
 ];
 
 const photo = (
@@ -237,6 +238,24 @@ export const VILLA_PHOTOS: readonly VillaPhoto[] = [
     1600,
     "hallway",
   ),
+  photo(
+    "21",
+    "21-garden-firepit-bay-view.jpg",
+    "Fire pit and benches in the Villa Di Marco garden, with gravel paths, wine-barrel planters, the vineyard, and bay views.",
+    "Garden and fire pit",
+    1180,
+    900,
+    "outdoors",
+  ),
+  photo(
+    "22",
+    "22-garden-vineyard-bay-view.jpg",
+    "Vineyard rows in the new garden at Villa Di Marco, with bay views on the horizon.",
+    "Vineyard and bay",
+    1600,
+    780,
+    "outdoors",
+  ),
 ];
 
 export function villaPhoto(id: string): VillaPhoto {
@@ -254,12 +273,12 @@ export const VILLA_GALLERY: readonly VillaPhoto[] = VILLA_PHOTO_GROUPS.flatMap((
 export const VILLA_HERO = villaPhoto("01");
 
 /** Home page "Inside Villa Di Marco" highlights, in display order. */
-export const HOME_VILLA_HIGHLIGHTS: readonly VillaPhoto[] = ["01", "02", "05", "09", "16", "15"].map(
+export const HOME_VILLA_HIGHLIGHTS: readonly VillaPhoto[] = ["01", "02", "05", "09", "16", "15", "21"].map(
   villaPhoto,
 );
 
-/** The Estate page interiors. Pool, La Stalla, and the farm stay as placeholders. */
-export const ESTATE_PHOTOS: readonly VillaPhoto[] = ["01", "05", "08"].map(villaPhoto);
+/** The Estate page. Pool, La Stalla, and the farm stay as placeholders. */
+export const ESTATE_PHOTOS: readonly VillaPhoto[] = ["01", "05", "08", "21"].map(villaPhoto);
 
 export const defaultOgImage = {
   url: VILLA_HERO.src,

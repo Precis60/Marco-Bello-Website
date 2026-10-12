@@ -3,7 +3,7 @@ import Link from "next/link";
 import { SitePhoto } from "@/components/SitePhoto";
 import type { VillaPhoto } from "@/lib/photos";
 
-const STRIP_SIZES = "(min-width: 1024px) 180px, (min-width: 640px) 33vw, 50vw";
+const STRIP_SIZES = "(min-width: 1024px) 250px, (min-width: 640px) 33vw, 50vw";
 
 export function PhotoStrip({
   photos,
@@ -20,7 +20,11 @@ export function PhotoStrip({
           All house photos →
         </Link>
       </div>
-      <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <ul
+        className={`mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 ${
+          photos.length > 6 ? "lg:grid-cols-4" : "lg:grid-cols-6"
+        }`}
+      >
         {photos.map((photo) => (
           <li key={photo.id}>
             <Link href={`/villa-di-marco#photo-${photo.id}`} className="group block">

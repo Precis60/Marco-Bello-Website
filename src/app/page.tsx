@@ -112,8 +112,7 @@ export default function Home() {
           <div className="mt-10">
             <PhotoStrip photos={HOME_VILLA_HIGHLIGHTS} />
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <PhotoPlaceholder label="The landscaped garden" />
+          <div className="mt-8">
             <PhotoPlaceholder label="Bay and Melbourne skyline from the hill" />
           </div>
         </Container>
