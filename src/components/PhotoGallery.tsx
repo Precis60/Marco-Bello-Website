@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-import { SitePhoto } from "@/components/SitePhoto";
+import { SitePhoto, TILE_SIZES } from "@/components/SitePhoto";
 import { VILLA_PHOTO_GROUPS, type VillaPhoto, type VillaPhotoGroup } from "@/lib/photos";
-
-const GALLERY_SIZES = "(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw";
 
 export function PhotoGallery({
   photos,
@@ -61,13 +59,14 @@ export function PhotoGallery({
                     <figure>
                       <button
                         type="button"
-                        className="block w-full overflow-hidden rounded-2xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        className="relative block aspect-[4/3] w-full overflow-hidden rounded-2xl bg-black/5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                         onClick={() => setOpenIndex(index)}
                       >
                         <SitePhoto
                           photo={item}
-                          sizes={GALLERY_SIZES}
-                          className="h-auto w-full"
+                          sizes={TILE_SIZES}
+                          fill
+                          className="object-cover object-center"
                         />
                       </button>
                       <figcaption className="mt-2 text-sm text-muted">{item.caption}</figcaption>

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
-import { SitePhoto } from "@/components/SitePhoto";
+import { FramedPhoto, HERO_SIZES } from "@/components/SitePhoto";
 import { FARM_PHOTO } from "@/lib/photos";
 import { pageMeta } from "@/lib/site";
 
@@ -25,13 +25,8 @@ export default function FarmPage() {
           is about 25 minutes away, and Melbourne about an hour and twenty.
         </p>
 
-        <figure className="mt-8 overflow-hidden rounded-3xl">
-          <SitePhoto
-            photo={FARM_PHOTO}
-            priority
-            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
-            className="h-auto w-full"
-          />
+        <figure className="mt-8">
+          <FramedPhoto photo={FARM_PHOTO} priority sizes={HERO_SIZES} />
           <figcaption className="mt-2 text-sm text-muted">{FARM_PHOTO.caption}</figcaption>
         </figure>
 
