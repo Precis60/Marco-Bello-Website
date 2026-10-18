@@ -18,7 +18,7 @@ import {
   VILLA_ID,
   VILLA_SEASONS,
 } from "@/lib/rates";
-import { pageMeta } from "@/lib/site";
+import { PUBLIC_NAV_LIMITED, pageMeta } from "@/lib/site";
 
 export const metadata = pageMeta({
   title: "Villa Di Marco | Drysdale accommodation with heated pool | Bello Marco Farm",
@@ -43,7 +43,10 @@ export default function VillaPage() {
         <p className="mt-4 text-sm font-medium">From {formatAud(FROM_PRICES.villa)} / night · winter weeknights, then up through the peak</p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <a href="#availability" className="btn btn-primary">Book / check availability</a>
-          <Link href="/the-estate" className="btn btn-secondary">Whole property as The Estate</Link>
+          {/* TEMPORARILY HIDDEN — restore by setting PUBLIC_NAV_LIMITED to false in src/lib/site.ts. */}
+          {PUBLIC_NAV_LIMITED ? null : (
+            <Link href="/the-estate" className="btn btn-secondary">Whole property as The Estate</Link>
+          )}
         </div>
 
         <figure className="mt-10 overflow-hidden rounded-3xl">
