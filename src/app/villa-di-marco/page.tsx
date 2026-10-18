@@ -4,7 +4,7 @@ import { BookingCalendar } from "@/components/BookingCalendar";
 import { Container } from "@/components/Container";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
-import { SitePhoto } from "@/components/SitePhoto";
+import { FramedPhoto, HERO_SIZES } from "@/components/SitePhoto";
 import { SunsetBand } from "@/components/SunsetBand";
 import { BAY_SUNSET, BAY_SUNSET_MOBILE, VILLA_GALLERY, VILLA_HERO } from "@/lib/photos";
 import {
@@ -49,13 +49,8 @@ export default function VillaPage() {
           )}
         </div>
 
-        <figure className="mt-10 overflow-hidden rounded-3xl">
-          <SitePhoto
-            photo={VILLA_HERO}
-            priority
-            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
-            className="h-auto w-full"
-          />
+        <figure className="mt-10">
+          <FramedPhoto photo={VILLA_HERO} priority sizes={HERO_SIZES} />
           <figcaption className="sr-only">{VILLA_HERO.caption}</figcaption>
         </figure>
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { FactGrid, PhotoPlaceholder } from "@/components/PhotoPlaceholder";
 import { PhotoStrip } from "@/components/PhotoStrip";
-import { SitePhoto } from "@/components/SitePhoto";
+import { FramedPhoto, HERO_SIZES, SitePhoto } from "@/components/SitePhoto";
 import { SunsetBand } from "@/components/SunsetBand";
 import {
   BAY_SUNSET,
@@ -91,13 +91,8 @@ export default function Home() {
             </div>
             <p className="mt-4 text-sm text-muted">From {formatAud(FROM_PRICES.villa)} / night in winter.</p>
           </div>
-          <figure className="mt-10 overflow-hidden rounded-3xl">
-            <SitePhoto
-              photo={VILLA_HERO}
-              priority
-              sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
-              className="h-auto w-full"
-            />
+          <figure className="mt-10">
+            <FramedPhoto photo={VILLA_HERO} priority sizes={HERO_SIZES} />
             <figcaption className="sr-only">{VILLA_HERO.caption}</figcaption>
           </figure>
         </Container>
@@ -193,7 +188,7 @@ export default function Home() {
                 className="overflow-hidden rounded-3xl border border-black/10 bg-surface transition hover:border-black/20"
               >
                 {"photo" in stay && stay.photo ? (
-                  <span className="relative block aspect-[3/4] overflow-hidden bg-black/5">
+                  <span className="relative block aspect-[4/3] overflow-hidden bg-black/5">
                     <SitePhoto
                       photo={stay.photo}
                       sizes="(min-width: 1024px) 360px, 100vw"

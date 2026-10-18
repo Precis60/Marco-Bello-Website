@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { FactGrid, LevyNote, PhotoPlaceholder, RateTable } from "@/components/PhotoPlaceholder";
-import { SitePhoto } from "@/components/SitePhoto";
+import { FramedPhoto, HERO_SIZES, TILE_SIZES } from "@/components/SitePhoto";
 import { ESTATE_FARM_HERO, ESTATE_PHOTOS, PADDOCK_SUNSET, VIVID_SUNSET } from "@/lib/photos";
 import { ESTATE_CLEANING, ESTATE_SEASONS, formatAud, FROM_PRICES } from "@/lib/rates";
 import { pageMeta } from "@/lib/site";
@@ -31,13 +31,8 @@ export default function EstatePage() {
           and midweek corporate retreats.
         </p>
 
-        <figure className="mt-8 overflow-hidden rounded-3xl">
-          <SitePhoto
-            photo={ESTATE_FARM_HERO}
-            priority
-            sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
-            className="h-auto w-full"
-          />
+        <figure className="mt-8">
+          <FramedPhoto photo={ESTATE_FARM_HERO} priority sizes={HERO_SIZES} />
           <figcaption className="mt-2 text-sm text-muted">{ESTATE_FARM_HERO.caption}</figcaption>
         </figure>
 
@@ -45,14 +40,7 @@ export default function EstatePage() {
           {ESTATE_PHOTOS.map((photo) => (
             <li key={photo.id}>
               <figure>
-                <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-black/5">
-                  <SitePhoto
-                    photo={photo}
-                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
-                    fill
-                    className="object-cover object-center"
-                  />
-                </span>
+                <FramedPhoto photo={photo} sizes={TILE_SIZES} rounded="rounded-2xl" />
                 <figcaption className="mt-2 text-sm text-muted">{photo.caption}</figcaption>
               </figure>
             </li>
@@ -77,12 +65,8 @@ export default function EstatePage() {
 
         <section className="mt-16">
           <h2 className="text-3xl font-semibold tracking-tight">Sunset over the bay</h2>
-          <figure className="mt-8 overflow-hidden rounded-3xl">
-            <SitePhoto
-              photo={VIVID_SUNSET}
-              sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
-              className="h-auto w-full"
-            />
+          <figure className="mt-8">
+            <FramedPhoto photo={VIVID_SUNSET} sizes={HERO_SIZES} />
             <figcaption className="mt-2 text-sm text-muted">{VIVID_SUNSET.caption}</figcaption>
           </figure>
         </section>
@@ -94,12 +78,8 @@ export default function EstatePage() {
               Villa Di Marco and La Stalla share the same farm. Past the house and the garden, the land is open paddock.
             </p>
           </div>
-          <figure className="mt-8 overflow-hidden rounded-3xl">
-            <SitePhoto
-              photo={PADDOCK_SUNSET}
-              sizes="(min-width: 1152px) 1088px, calc(100vw - 3rem)"
-              className="h-auto w-full"
-            />
+          <figure className="mt-8">
+            <FramedPhoto photo={PADDOCK_SUNSET} sizes={HERO_SIZES} />
             <figcaption className="mt-2 text-sm text-muted">{PADDOCK_SUNSET.caption}</figcaption>
           </figure>
         </section>
