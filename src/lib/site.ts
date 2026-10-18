@@ -18,7 +18,17 @@ export const ADDRESS = {
 
 export const ADDRESS_LINE = "275 Founds Road, Drysdale VIC 3222";
 
-export const NAV_LINKS = [
+/**
+ * TEMPORARILY HIDDEN — restore by setting this to false.
+ * While true, the header, the footer stay/visit lists, the home “ways to stay”
+ * cards, and the Villa Di Marco “Whole property as The Estate” button show only
+ * Villa Di Marco. The logo, Enquire, booking, checkout, and admin are unchanged.
+ * Hidden pages, routes, photos, and data stay in the repo and remain reachable
+ * by direct URL.
+ */
+export const PUBLIC_NAV_LIMITED: boolean = true;
+
+const ALL_NAV_LINKS = [
   { href: "/villa-di-marco", label: "Villa Di Marco" },
   { href: "/la-stalla", label: "La Stalla" },
   { href: "/the-estate", label: "The Estate" },
@@ -28,6 +38,10 @@ export const NAV_LINKS = [
   { href: "/events", label: "Events" },
   { href: "/the-farm", label: "The Farm" },
 ] as const;
+
+export const NAV_LINKS = PUBLIC_NAV_LIMITED
+  ? ALL_NAV_LINKS.filter((link) => link.href === "/villa-di-marco")
+  : ALL_NAV_LINKS;
 
 /**
  * Production origin used when no site URL is configured.

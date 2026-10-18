@@ -15,7 +15,7 @@ import {
   defaultOgImage,
 } from "@/lib/photos";
 import { FROM_PRICES, formatAud, LEVY_NOTE } from "@/lib/rates";
-import { absoluteUrl } from "@/lib/site";
+import { PUBLIC_NAV_LIMITED, absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
@@ -159,7 +159,9 @@ export default function Home() {
 
       <section className="pb-20">
         <Container>
-          <h2 className="text-3xl font-semibold tracking-tight">Three ways to stay</h2>
+          <h2 className="text-3xl font-semibold tracking-tight">
+            {PUBLIC_NAV_LIMITED ? "Stay at Villa Di Marco" : "Three ways to stay"}
+          </h2>
           <div className="mt-8 grid gap-6 lg:grid-cols-3">
             {[
               {
@@ -181,7 +183,10 @@ export default function Home() {
                 text: "Both stays together, for up to 16 guests. Pool and spa for the whole group.",
                 photo: HOME_FARM_INTRO,
               },
-            ].map((stay) => (
+            ]
+              // TEMPORARILY HIDDEN — restore by setting PUBLIC_NAV_LIMITED to false in src/lib/site.ts.
+              .filter((stay) => !PUBLIC_NAV_LIMITED || stay.href === "/villa-di-marco")
+              .map((stay) => (
               <Link
                 key={stay.href}
                 href={stay.href}

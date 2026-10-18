@@ -17,6 +17,7 @@ export function SiteFooter() {
             </p>
           </div>
 
+          {/* Stay and Visit lists follow NAV_LINKS. TEMPORARILY HIDDEN — restore by setting PUBLIC_NAV_LIMITED to false in src/lib/site.ts. */}
           <div className="grid grid-cols-2 gap-6 text-sm">
             <div className="space-y-2">
               <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted">Stay</div>
